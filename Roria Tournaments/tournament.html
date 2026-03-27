@@ -8,396 +8,234 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-    --red: #e3350d; --red-dk: #b02a0a; --yellow: #f7c948;
-    --blue: #2c6fad; --white: #f8f8f8; --off: #ece8df;
-    --card: #ffffff; --border: #c8c0b0; --text: #2a2a2a;
-    --muted: #7a7265; --green: #4caf50; --nav-h: 60px;
-    --shadow: 0 4px 0 rgba(0,0,0,0.15);
-  }
+            --red: #e3350d; --red-dk: #b02a0a; --yellow: #f7c948;
+            --blue: #2c6fad; --white: #f8f8f8; --off: #ece8df;
+            --card: #ffffff; --border: #c8c0b0; --text: #2a2a2a;
+            --muted: #7a7265; --green: #4caf50; --nav-h: 60px;
+            --shadow: 0 4px 0 rgba(0,0,0,0.15);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--off);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { 
-    font-family: 'Nunito', sans-serif; 
-    background: var(--off); 
-    color: var(--text); 
-    min-height: 100vh; 
-    overflow-x: hidden; 
-    display: flex;          /* Added */
-    flex-direction: column; /* Added */
-}
-
-  /* ══════════════════ NAV ══════════════════ */
-  nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    height: var(--nav-h);
-    background: var(--red);
-    border-bottom: 4px solid var(--red-dk);
-    display: flex;
-    align-items: center;
-    padding: 0 20px;
-    gap: 16px;
-    z-index: 200;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-  }
-
-  /* hamburger — left */
-  .hamburger {
-    width: 40px; height: 40px;
-    display: flex; flex-direction: column;
-    justify-content: center; align-items: center; gap: 5px;
-    cursor: pointer;
-    border-radius: 8px;
-    border: 2px solid rgba(255,255,255,0.3);
-    background: rgba(255,255,255,0.1);
-    transition: background .2s;
-    flex-shrink: 0;
-  }
-  .hamburger:hover { background: rgba(255,255,255,0.2); }
-  .hamburger span {
-    display: block;
-    width: 18px; height: 2px;
-    background: #fff;
-    border-radius: 2px;
-    transition: transform .3s, opacity .3s;
-    transform-origin: center;
-  }
-  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-  .hamburger.open span:nth-child(2) { opacity: 0; }
-  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-  /* logo — centre */
-  .nav-logo {
-    position: absolute;
-    left: 50%; transform: translateX(-50%);
-    display: flex; flex-direction: column; align-items: center;
-    line-height: 1;
-    pointer-events: none;
-    user-select: none;
-  }
-  .nav-logo .top-line {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 9px;
-    color: var(--yellow);
-    letter-spacing: 3px;
-    text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
-  }
-  .nav-logo .bottom-line {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 13px;
-    color: #fff;
-    letter-spacing: 1px;
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
-  }
-
-  /* user chip — right */
-  .nav-right {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .nav-btn {
-    padding: 7px 16px;
-    border-radius: 20px;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 800;
-    font-size: 13px;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: all .2s;
-    white-space: nowrap;
-  }
-  .nav-btn-ghost {
-    background: rgba(255,255,255,0.15);
-    border-color: rgba(255,255,255,0.4);
-    color: #fff;
-  }
-  .nav-btn-ghost:hover { background: rgba(255,255,255,0.25); }
-  .nav-btn-solid {
-    background: var(--yellow);
-    border-color: #d4a017;
-    color: #2a2a2a;
-    box-shadow: 0 3px 0 #d4a017;
-  }
-  .nav-btn-solid:hover { transform: translateY(1px); box-shadow: 0 2px 0 #d4a017; }
-
-  .user-chip {
-    display: flex; align-items: center; gap: 8px;
-    padding: 5px 14px 5px 7px;
-    background: rgba(255,255,255,0.15);
-    border: 2px solid rgba(255,255,255,0.3);
-    border-radius: 20px;
-    cursor: pointer;
-    transition: background .2s;
-  }
-  .user-chip:hover { background: rgba(255,255,255,0.25); }
-  .user-chip .av {
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    background: var(--yellow);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 800; color: var(--red-dk);
-    border: 2px solid #fff;
-    font-family: 'Nunito', sans-serif;
-  }
-  .user-chip .uname { color: #fff; font-weight: 800; font-size: 13px; }
-
-  /* ══════════════════ DRAWER ══════════════════ */
-  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; opacity: 0; pointer-events: none; transition: 0.3s; }
-  .overlay.open { opacity: 1; pointer-events: all; }
-  .drawer { position: fixed; top: 0; left: 0; width: 280px; height: 100%; background: #fff; border-right: 4px solid var(--border); z-index: 400; transform: translateX(-100%); transition: 0.3s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; }
-  .drawer.open { transform: translateX(0); }
-  .drawer-item { display: flex; align-items: center; gap: 14px; padding: 15px 20px; cursor: pointer; font-weight: 700; color: var(--text); text-decoration: none; border-bottom: 1px solid var(--off); }
-  .drawer-item:hover { background: var(--off); color: var(--red); }
-
-  /* ══════════════════ LAYOUT ══════════════════ */
-  .hero { padding-top: calc(var(--nav-h) + 40px); display: flex; justify-content: center; padding-bottom: 60px; }
-  .profile-layout { display: grid; grid-template-columns: 320px 1fr; gap: 30px; width: 100%; max-width: 1100px; padding: 0 20px; align-items: start; }
-
-  .profile-card { background: #fff; border: 3px solid var(--border); border-radius: 18px; padding: 24px; box-shadow: var(--shadow); margin-bottom: 20px; }
-  .avatar-container { position: relative; width: 110px; height: 110px; margin: 0 auto 16px; }
-  .profile-av { width: 100px; height: 100px; border-radius: 50%; background: var(--red); border: 5px solid var(--red-dk); display: flex; align-items: center; justify-content: center; font-size: 40px; color: #fff; font-weight: 800; object-fit: cover; }
-  .edit-av-btn { position: absolute; bottom: 0; right: 0; width: 34px; height: 34px; background: var(--yellow); border: 3px solid var(--text); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-
-  .prof-user { font-family: 'Press Start 2P'; font-size: 16px; margin-bottom: 5px; text-align: center; }
-  .prof-roria { color: var(--muted); font-weight: 700; margin-bottom: 20px; text-align: center; display: block; }
-
-  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 24px; }
-  .stat-card { background: #fff; border: 3px solid var(--border); border-radius: 14px; padding: 15px; text-align: center; box-shadow: var(--shadow); }
-  .stat-val { font-family: 'Press Start 2P'; font-size: 18px; display: block; }
-  .stat-label { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; }
-
-  .field { margin-bottom: 15px; text-align: left; }
-  .field label { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
-  .field input { width: 100%; background: var(--off); border: 2px solid var(--border); border-radius: 10px; padding: 10px; font-weight: 700; outline: none; }
-  .btn-poke { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; background: var(--red); color: #fff; box-shadow: 0 4px 0 var(--red-dk); transition: 0.1s; }
-  .btn-poke:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--red-dk); }
-
-  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #2a2a2a; color: #fff; padding: 12px 24px; border-radius: 30px; opacity: 0; transition: 0.3s; z-index: 999; pointer-events: none; }
-  .toast.show { opacity: 1; }
-
-  @media (max-width: 900px) { .profile-layout { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: 1fr 1fr; } }
-
-  /* ══════════════════ OVERLAY + DRAWER ══════════════════ */
-  .overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.45);
-    z-index: 300;
-    opacity: 0; pointer-events: none;
-    transition: opacity .3s;
-  }
-  .overlay.open { opacity: 1; pointer-events: all; }
-
-  .drawer {
-    position: fixed;
-    top: 0; left: 0;
-    width: 280px; height: 100%;
-    background: #fff;
-    border-right: 4px solid var(--border);
-    z-index: 400;
-    transform: translateX(-100%);
-    transition: transform .32s cubic-bezier(.4,0,.2,1);
-    display: flex; flex-direction: column;
-    box-shadow: 4px 0 24px rgba(0,0,0,0.15);
-  }
-  .drawer.open { transform: translateX(0); }
-
-  .drawer-header {
-    background: var(--red);
-    border-bottom: 4px solid var(--red-dk);
-    padding: 18px 20px;
-    display: flex; flex-direction: column; align-items: flex-start;
-  }
-  .drawer-header .site-tag {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 7px;
-    color: var(--yellow);
-    letter-spacing: 2px;
-    margin-bottom: 4px;
-  }
-  .drawer-header .site-name {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 11px;
-    color: #fff;
-    line-height: 1.6;
-  }
-
-  .drawer-section {
-    padding: 14px 20px 6px;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .drawer-item {
-    display: flex; align-items: center; gap: 14px;
-    padding: 13px 20px;
-    cursor: pointer;
-    border-left: 4px solid transparent;
-    transition: all .15s;
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-    text-decoration: none;
-  }
-  .drawer-item:hover {
-    background: var(--off);
-    border-left-color: var(--red);
-    color: var(--red);
-  }
-  .drawer-item .di-icon { font-size: 20px; width: 26px; text-align: center; }
-
-  .drawer-divider { height: 1px; background: var(--border); margin: 8px 20px; }
-
-  /* logged-in section in drawer */
-  .drawer-user-section {
-    padding: 16px 20px;
-    background: var(--off);
-    border-top: 1px solid var(--border);
-    margin-top: auto;
-  }
-  .drawer-user-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .drawer-av {
-    width: 38px; height: 38px; border-radius: 50%;
-    background: var(--red);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; font-weight: 800; color: #fff;
-    border: 3px solid var(--red-dk);
-  }
-  .drawer-uname { font-weight: 800; font-size: 15px; }
-  .drawer-suname { font-size: 12px; color: var(--muted); }
-  .drawer-logout {
-    width: 100%;
-    padding: 9px;
-    border-radius: 8px;
-    background: transparent;
-    border: 2px solid var(--border);
-    font-family: 'Nunito', sans-serif;
-    font-weight: 800;
-    font-size: 13px;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all .2s;
-  }
-  .drawer-logout:hover { border-color: var(--red); color: var(--red); }
-
-  /* user chip — right */
-  .nav-right {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-        /* Reuse your root variables and base styles here */
+        /* ══════════════════ NAV ══════════════════ */
         nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: var(--nav-h);
-  background: var(--red);
-  border-bottom: 4px solid var(--red-dk);
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  gap: 16px;
-  z-index: 200;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-}
+            position: fixed; top: 0; left: 0; right: 0;
+            height: var(--nav-h);
+            background: var(--red);
+            border-bottom: 4px solid var(--red-dk);
+            display: flex; align-items: center;
+            padding: 0 20px; gap: 16px;
+            z-index: 200;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        }
+        .hamburger { width: 40px; height: 40px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; cursor: pointer; border-radius: 8px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); transition: background .2s; flex-shrink: 0; }
+        .hamburger:hover { background: rgba(255,255,255,0.2); }
+        .hamburger span { display: block; width: 18px; height: 2px; background: #fff; border-radius: 2px; transition: transform .3s, opacity .3s; transform-origin: center; }
+        .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+        .nav-logo { position: absolute; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; line-height: 1; pointer-events: none; user-select: none; }
+        .nav-logo .top-line { font-family: 'Press Start 2P', monospace; font-size: 9px; color: var(--yellow); letter-spacing: 3px; text-shadow: 1px 1px 0 rgba(0,0,0,0.3); }
+        .nav-logo .bottom-line { font-family: 'Press Start 2P', monospace; font-size: 13px; color: #fff; letter-spacing: 1px; text-shadow: 2px 2px 0 rgba(0,0,0,0.3); }
+        .nav-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+        .nav-btn { padding: 7px 16px; border-radius: 20px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px; cursor: pointer; border: 2px solid transparent; transition: all .2s; white-space: nowrap; }
+        .nav-btn-ghost { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4); color: #fff; }
+        .nav-btn-ghost:hover { background: rgba(255,255,255,0.25); }
+        .nav-btn-solid { background: var(--yellow); border-color: #d4a017; color: #2a2a2a; box-shadow: 0 3px 0 #d4a017; }
+        .nav-btn-solid:hover { transform: translateY(1px); box-shadow: 0 2px 0 #d4a017; }
+        .user-chip { display: flex; align-items: center; gap: 8px; padding: 5px 14px 5px 7px; background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); border-radius: 20px; cursor: pointer; transition: background .2s; }
+        .user-chip:hover { background: rgba(255,255,255,0.25); }
+        .user-chip .av { width: 28px; height: 28px; border-radius: 50%; background: var(--yellow); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: var(--red-dk); border: 2px solid #fff; }
+        .user-chip .uname { color: #fff; font-weight: 800; font-size: 13px; }
 
-.hamburger { width: 40px; height: 40px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; cursor: pointer; border-radius: 8px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); transition: background .2s; flex-shrink: 0; }
-.hamburger span { display: block; width: 18px; height: 2px; background: #fff; border-radius: 2px; transition: transform .3s, opacity .3s; transform-origin: center; }
-.nav-logo { position: absolute; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; line-height: 1; pointer-events: none; user-select: none; }
-.nav-logo .top-line { font-family: 'Press Start 2P', monospace; font-size: 9px; color: var(--yellow); letter-spacing: 3px; text-shadow: 1px 1px 0 rgba(0,0,0,0.3); }
-.nav-logo .bottom-line { font-family: 'Press Start 2P', monospace; font-size: 13px; color: #fff; letter-spacing: 1px; text-shadow: 2px 2px 0 rgba(0,0,0,0.3); }
-.nav-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+        /* ══════════════════ OVERLAY + DRAWER ══════════════════ */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 300; opacity: 0; pointer-events: none; transition: opacity .3s; }
+        .overlay.open { opacity: 1; pointer-events: all; }
+        .drawer { position: fixed; top: 0; left: 0; width: 280px; height: 100%; background: #fff; border-right: 4px solid var(--border); z-index: 400; transform: translateX(-100%); transition: transform .32s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; box-shadow: 4px 0 24px rgba(0,0,0,0.15); }
+        .drawer.open { transform: translateX(0); }
+        .drawer-header { background: var(--red); border-bottom: 4px solid var(--red-dk); padding: 18px 20px; display: flex; flex-direction: column; align-items: flex-start; }
+        .drawer-header .site-tag { font-family: 'Press Start 2P', monospace; font-size: 7px; color: var(--yellow); letter-spacing: 2px; margin-bottom: 4px; }
+        .drawer-header .site-name { font-family: 'Press Start 2P', monospace; font-size: 11px; color: #fff; line-height: 1.6; }
+        .drawer-section { padding: 14px 20px 6px; font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+        .drawer-item { display: flex; align-items: center; gap: 14px; padding: 13px 20px; cursor: pointer; border-left: 4px solid transparent; transition: all .15s; font-size: 15px; font-weight: 700; color: var(--text); text-decoration: none; }
+        .drawer-item:hover { background: var(--off); border-left-color: var(--red); color: var(--red); }
+        .drawer-item .di-icon { font-size: 20px; width: 26px; text-align: center; }
+        .drawer-divider { height: 1px; background: var(--border); margin: 8px 20px; }
+        .drawer-user-section { padding: 16px 20px; background: var(--off); border-top: 1px solid var(--border); margin-top: auto; }
+        .drawer-user-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .drawer-av { width: 38px; height: 38px; border-radius: 50%; background: var(--red); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: #fff; border: 3px solid var(--red-dk); }
+        .drawer-uname { font-weight: 800; font-size: 15px; }
+        .drawer-suname { font-size: 12px; color: var(--muted); }
+        .drawer-logout { width: 100%; padding: 9px; border-radius: 8px; background: transparent; border: 2px solid var(--border); font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px; color: var(--muted); cursor: pointer; transition: all .2s; }
+        .drawer-logout:hover { border-color: var(--red); color: var(--red); }
 
-/* 2. MAIN CONTAINER: FLEX GROW */
-.t-container { 
-  max-width: 800px; 
-  width: 90%;
-  margin: 120px auto 60px; /* 120px top margin to clear the fixed navbar */
-  background: white; 
-  border: 4px solid var(--border); 
-  border-radius: 18px; 
-  padding: 40px; 
-  flex: 1 0 auto; /* This pushes the footer down! */
-  box-shadow: var(--shadow);
-}
+        /* ══════════════════ MAIN CONTAINER ══════════════════ */
+        .t-container {
+            max-width: 900px; width: 90%;
+            margin: calc(var(--nav-h) + 40px) auto 60px;
+            background: white;
+            border: 3px solid var(--border);
+            border-radius: 18px;
+            padding: 36px;
+            flex: 1 0 auto;
+            box-shadow: var(--shadow);
+        }
+        .t-header { border-bottom: 2px solid var(--off); margin-bottom: 24px; padding-bottom: 20px; }
+        .t-name { font-family: 'Press Start 2P', monospace; font-size: 18px; color: var(--red); line-height: 1.5; margin-bottom: 12px; }
+        .t-meta { display: flex; gap: 20px; margin-top: 10px; font-weight: 800; color: var(--muted); font-size: 12px; }
 
-.t-header { border-bottom: 2px solid var(--off); margin-bottom: 20px; padding-bottom: 20px; }
-.t-name { font-family: 'Press Start 2P', monospace; font-size: 18px; color: var(--red); line-height: 1.4; }
-.t-meta { display: flex; gap: 20px; margin-top: 10px; font-weight: 800; color: #777; font-size: 12px; }
-.t-desc { line-height: 1.6; margin: 20px 0; color: var(--text); }
+        /* ══════════════════ COUNTDOWN ══════════════════ */
+        #countdown-box {
+            background: var(--text); color: var(--yellow);
+            padding: 18px 20px; border-radius: 12px;
+            font-family: 'Press Start 2P', monospace; font-size: 10px;
+            text-align: center; border: 3px solid #111;
+            margin: 16px 0; line-height: 2;
+        }
+        #countdown-box .cd-label { color: rgba(255,255,255,0.6); font-size: 8px; letter-spacing: 2px; margin-bottom: 8px; display: block; }
+        .timer-parts { display: flex; justify-content: center; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+        .timer-unit { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .timer-num { font-size: 22px; color: #fff; line-height: 1; }
+        .timer-label { font-size: 7px; color: rgba(255,255,255,0.5); letter-spacing: 1px; }
 
-/* 3. STICKY FOOTER */
-footer {
-  flex-shrink: 0; /* Prevents shrinking */
-  background: var(--text);
-  color: rgba(255,255,255,0.5);
-  text-align: center;
-  padding: 28px 20px;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 8px;
-  letter-spacing: 2px;
-  line-height: 2;
-  margin-top: auto; /* Final push to bottom */
-}
-footer span { color: var(--yellow); }
+        /* ══════════════════ PLAYER LIST ══════════════════ */
+        .section-title {
+            font-family: 'Press Start 2P', monospace; font-size: 11px;
+            color: var(--text); margin-bottom: 16px;
+            padding-bottom: 10px; border-bottom: 2px solid var(--off);
+        }
+        .player-row {
+            background: var(--off); border: 2px solid var(--border);
+            border-radius: 10px; margin-bottom: 8px;
+            padding: 12px 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-weight: 700; transition: border-color .2s;
+        }
+        .player-row:hover { border-color: var(--red); }
+        .player-num { font-family: 'Press Start 2P', monospace; font-size: 9px; color: var(--muted); width: 28px; }
+        .player-name { flex: 1; font-size: 14px; }
+        .player-date { font-size: 11px; color: var(--muted); font-weight: 600; }
 
-/* Other UI elements */
-.btn-poke { padding: 12px 24px; border-radius: 10px; border: none; font-weight: 800; cursor: pointer; background: var(--red); color: white; text-transform: uppercase; box-shadow: 0 4px 0 var(--red-dk); transition: .1s; }
-.btn-poke:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--red-dk); }
-.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; opacity: 0; pointer-events: none; transition: 0.3s; }
-.overlay.open { opacity: 1; pointer-events: all; }
-.drawer { position: fixed; top: 0; left: 0; width: 280px; height: 100%; background: #fff; border-right: 4px solid var(--border); z-index: 400; transform: translateX(-100%); transition: 0.3s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; }
-.drawer.open { transform: translateX(0); }
+        /* ══════════════════ GROUPS ══════════════════ */
+        .groups-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-top: 10px; }
+        .group-card {
+            background: #fff; border: 3px solid var(--border);
+            border-radius: 14px; overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        .group-card-header {
+            background: var(--red); color: #fff;
+            padding: 10px 16px;
+            font-family: 'Press Start 2P', monospace; font-size: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .group-card-header span { font-size: 8px; color: rgba(255,255,255,0.7); }
+        .group-table { width: 100%; border-collapse: collapse; }
+        .group-table th { font-size: 9px; text-transform: uppercase; color: var(--muted); padding: 8px 16px; text-align: left; background: var(--off); font-weight: 800; letter-spacing: 1px; }
+        .group-table td { padding: 10px 16px; font-weight: 700; font-size: 13px; border-top: 1px solid var(--off); }
+        .group-table td.pts { font-family: 'Press Start 2P', monospace; font-size: 10px; text-align: center; }
+        .group-table td.rank { font-family: 'Press Start 2P', monospace; font-size: 9px; color: var(--muted); width: 30px; }
+        .group-table tr.advancing td { background: rgba(76, 175, 80, 0.08); }
+        .group-table tr.advancing td.rank { color: var(--green); }
+        .advancing-badge { font-size: 8px; background: var(--green); color: #fff; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-family: 'Nunito', sans-serif; font-weight: 800; }
+
+        /* ══════════════════ MATCHES ══════════════════ */
+        .matches-section { margin-top: 24px; }
+        .match-card {
+            background: var(--off); border: 2px solid var(--border);
+            border-radius: 10px; margin-bottom: 8px;
+            padding: 12px 16px;
+            display: flex; align-items: center; gap: 12px;
+            font-weight: 700;
+        }
+        .match-vs { font-family: 'Press Start 2P', monospace; font-size: 8px; color: var(--muted); margin: 0 6px; }
+        .match-player { flex: 1; font-size: 13px; }
+        .match-player.right { text-align: right; }
+        .match-result { font-family: 'Press Start 2P', monospace; font-size: 10px; color: var(--muted); }
+
+        /* ══════════════════ BRACKET ══════════════════ */
+        .bracket-section { margin-top: 40px; }
+        .bracket-round { margin-bottom: 30px; }
+        .bracket-round-title { font-family: 'Press Start 2P', monospace; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; }
+        .bracket-match {
+            background: #fff; border: 2px solid var(--border);
+            border-radius: 10px; overflow: hidden;
+            margin-bottom: 10px; box-shadow: var(--shadow);
+            max-width: 460px;
+        }
+        .bracket-slot {
+            padding: 11px 16px; font-weight: 700; font-size: 13px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .bracket-slot:first-child { border-bottom: 1px solid var(--off); }
+        .bracket-slot.winner { background: rgba(76, 175, 80, 0.1); }
+        .bracket-slot .slot-pts { font-family: 'Press Start 2P', monospace; font-size: 10px; color: var(--muted); }
+        .bracket-slot.tbd .slot-name { color: var(--muted); font-style: italic; }
+
+        /* ══════════════════ REGISTER ZONE ══════════════════ */
+        .btn-poke { padding: 12px 24px; border-radius: 10px; border: none; font-family: 'Nunito', sans-serif; font-weight: 800; cursor: pointer; background: var(--red); color: #fff; text-transform: uppercase; box-shadow: 0 4px 0 var(--red-dk); transition: .1s; font-size: 14px; }
+        .btn-poke:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--red-dk); }
+        .btn-poke:disabled { background: var(--muted); box-shadow: 0 4px 0 #555; cursor: default; }
+
+        /* ══════════════════ UPCOMING BANNER ══════════════════ */
+        .upcoming-banner {
+            background: var(--off); border: 2px solid var(--border);
+            border-radius: 12px; padding: 20px 24px;
+            text-align: center; margin: 16px 0;
+            font-weight: 700; color: var(--muted); font-size: 14px;
+        }
+        .upcoming-banner strong { display: block; font-family: 'Press Start 2P', monospace; font-size: 10px; color: var(--text); margin-bottom: 8px; }
+
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #2a2a2a; color: #fff; padding: 12px 24px; border-radius: 30px; opacity: 0; transition: 0.3s; z-index: 999; pointer-events: none; font-weight: 700; }
+        .toast.show { opacity: 1; }
+
+        footer { flex-shrink: 0; background: var(--text); color: rgba(255,255,255,0.5); text-align: center; padding: 28px 20px; font-family: 'Press Start 2P', monospace; font-size: 8px; letter-spacing: 2px; line-height: 2; margin-top: auto; }
+        footer span { color: var(--yellow); }
+
+        @media (max-width: 700px) { .t-container { padding: 20px; } .timer-num { font-size: 16px; } }
     </style>
 </head>
 <body>
 
-    <nav>
-  <div class="hamburger" id="hamburger" onclick="toggleDrawer()">
-    <span></span><span></span><span></span>
-  </div>
-
-  <div class="nav-logo">
-    <span class="top-line">RBG</span>
-    <span class="bottom-line">RORIA TOURNAMENTS</span>
-  </div>
-
-  <div class="nav-right" id="navRight">
-    <button class="nav-btn nav-btn-ghost" onclick="openModal('login')">Log In</button>
-    <button class="nav-btn nav-btn-solid" onclick="openModal('signup')">Sign Up</button>
-  </div>
+<nav>
+    <div class="hamburger" id="hamburger" onclick="toggleDrawer()">
+        <span></span><span></span><span></span>
+    </div>
+    <div class="nav-logo">
+        <span class="top-line">RBG</span>
+        <span class="bottom-line">RORIA TOURNAMENTS</span>
+    </div>
+    <div class="nav-right" id="navRight">
+        <button class="nav-btn nav-btn-ghost">Log In</button>
+        <button class="nav-btn nav-btn-solid">Sign Up</button>
+    </div>
 </nav>
 
-<!-- ════════════ OVERLAY ════════════ -->
 <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
 
-<!-- ════════════ DRAWER ════════════ -->
 <div class="drawer" id="drawer">
-  <div class="drawer-header">
-    <div class="site-tag">RBG</div>
-    <div class="site-name">RORIA<br>TOURNAMENTS</div>
-  </div>
-
-  <div class="drawer-section">Menu</div>
-  <a class="drawer-item" onclick="closeDrawer()" a href="index.html"><span class="di-icon">🏠</span> Home</a>
-  <a class="drawer-item" onclick="closeDrawer()"><span class="di-icon">🏆</span> Leaderboard</a>
-  <a class="drawer-item" onclick="closeDrawer()"><span class="di-icon">⚡</span> Live Tournaments</a>
-  <a class="drawer-item" onclick="closeDrawer()"><span class="di-icon">📁</span> Past Tournaments</a>
-
-  <div class="drawer-divider"></div>
-
-  <div class="drawer-section">Info</div>
-  <a class="drawer-item" onclick="closeDrawer()"><span class="di-icon">📰</span> News</a>
-  <a class="drawer-item" onclick="closeDrawer()"><span class="di-icon">👥</span> About Us</a>
-
-  <!-- populated when logged in -->
-  <div id="drawerUserSection"></div>
+    <div class="drawer-header">
+        <div class="site-tag">RBG</div>
+        <div class="site-name">RORIA<br>TOURNAMENTS</div>
+    </div>
+    <div class="drawer-section">Menu</div>
+    <a class="drawer-item" href="index.html" onclick="closeDrawer()"><span class="di-icon">🏠</span> Home</a>
+    <a class="drawer-item" onclick="closeDrawer()"><span class="di-icon">🏆</span> Leaderboard</a>
+    <a class="drawer-item" onclick="closeDrawer()"><span class="di-icon">⚡</span> Live Tournaments</a>
+    <a class="drawer-item" onclick="closeDrawer()"><span class="di-icon">📁</span> Past Tournaments</a>
+    <div class="drawer-divider"></div>
+    <div class="drawer-section">Info</div>
+    <a class="drawer-item" onclick="closeDrawer()"><span class="di-icon">📰</span> News</a>
+    <a class="drawer-item" onclick="closeDrawer()"><span class="di-icon">👥</span> About Us</a>
+    <div id="drawerUserSection"></div>
 </div>
 
 <div class="t-container">
@@ -405,380 +243,603 @@ footer span { color: var(--yellow); }
         <h1 class="t-name" id="t-name">Loading...</h1>
         <div class="t-meta">
             <span id="t-status">STATUS: --</span>
-            <span id="t-players">PLAYERS: --</span>
+            <span id="t-players-count">PLAYERS: --</span>
         </div>
     </div>
 
-    <div class="t-desc" id="t-desc">
-        Loading tournament details...
+    <!-- COUNTDOWN box (used by upcoming + registration phases) -->
+    <div id="countdown-box" style="display:none;">
+        <span class="cd-label" id="cd-label">TOURNAMENT STARTS IN</span>
+        <div class="timer-parts">
+            <div class="timer-unit"><span class="timer-num" id="cd-days">00</span><span class="timer-label">DAYS</span></div>
+            <div class="timer-unit"><span class="timer-num" id="cd-hours">00</span><span class="timer-label">HRS</span></div>
+            <div class="timer-unit"><span class="timer-num" id="cd-mins">00</span><span class="timer-label">MIN</span></div>
+            <div class="timer-unit"><span class="timer-num" id="cd-secs">00</span><span class="timer-label">SEC</span></div>
+        </div>
     </div>
 
-    <div id="registration-zone">
+    <!-- UPCOMING PHASE -->
+    <div id="upcoming-section" style="display:none;">
+        <div class="upcoming-banner">
+            <strong>⏳ COMING SOON</strong>
+            Registration has not opened yet. Check back soon!
         </div>
+    </div>
+
+    <!-- REGISTRATION PHASE -->
+    <div id="registration-section" style="display:none;">
+        <div id="registration-zone" style="margin-bottom:20px;"></div>
+        <h3 class="section-title">Registered Trainers</h3>
+        <ul id="player-list" style="list-style:none; padding:0;"></ul>
+    </div>
+
+    <!-- GROUP STAGE PHASE -->
+    <div id="group-section" style="display:none;">
+        <h3 class="section-title">Group Stage</h3>
+        <div id="groups-container" class="groups-grid"></div>
+        <div id="group-matches-section" class="matches-section" style="margin-top:30px;">
+            <h3 class="section-title">Group Matches</h3>
+            <div id="group-matches-container"></div>
+        </div>
+    </div>
+
+    <!-- KNOCKOUT BRACKET -->
+    <div id="bracket-section" class="bracket-section" style="display:none;">
+        <h3 class="section-title" style="margin-top:30px;">Knockout Bracket</h3>
+        <div id="bracket-container"></div>
+    </div>
 </div>
+
+<div class="toast" id="toast"></div>
+
 <footer>
-  <span>RBG</span> RORIA TOURNAMENTS &nbsp;·&nbsp; © 2026 &nbsp;·&nbsp; ALL RIGHTS RESERVED
+    <span>RBG</span> RORIA TOURNAMENTS &nbsp;·&nbsp; © 2026 &nbsp;·&nbsp; ALL RIGHTS RESERVED
 </footer>
 
 <script>
-    const SUPABASE_URL = 'https://lvtmmtvxozabealfxqmy.supabase.co';
-    const SUPABASE_ANON = 'sb_publishable_tJbIaorQ_wp3Qt5_Vxwwgw_x7dcGc7-';
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+/* ══════════════════════════════════════════════
+   SUPABASE + AUTH
+══════════════════════════════════════════════ */
+const SUPABASE_URL  = 'https://lvtmmtvxozabealfxqmy.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_tJbIaorQ_wp3Qt5_Vxwwgw_x7dcGc7-';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    const params = new URLSearchParams(window.location.search);
-    const tournamentId = params.get('id');
-
-    async function init() {
-        const { data: t } = await sb.from('tournaments').select('*').eq('id', tournamentId).single();
-        if (!t) return document.body.innerHTML = "Tournament not found.";
-
-        document.getElementById('t-name').textContent = t.name;
-        document.getElementById('t-desc').textContent = t.description || "No description provided.";
-        document.getElementById('t-status').textContent = `STATUS: ${t.status.toUpperCase()}`;
-        
-        const regZone = document.getElementById('registration-zone');
-        if (t.status === 'registration') {
-            regZone.innerHTML = `<button class="btn-poke" onclick="join()">Request to Join</button>`;
-        } else {
-            regZone.innerHTML = `<p>Registration is currently closed for this tournament.</p>`;
-        }
-    }
-
-    async function join() {
-        const { data: { session } } = await sb.auth.getSession();
-        if (!session) return alert("Please log in first!");
-
-        const { error } = await sb.from('tournament_participants').insert({
-            tournament_id: tournamentId,
-            profile_id: session.user.id
-        });
-
-        if (error) alert("You are already registered or an error occurred.");
-        else alert("Success! Your participation request has been sent.");
-    }
-
-    init();
-
-
+const params       = new URLSearchParams(window.location.search);
+const tournamentId = params.get('id');
 
 let currentUser = null;
-let profile = null;
+let profile     = null;
 
 window.addEventListener('DOMContentLoaded', async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) await fetchProfile(session.user);
-  
-  sb.auth.onAuthStateChange(async (event, session) => {
-    if (session) await fetchProfile(session.user);
-    else { window.location.href = 'index.html'; }
-  });
-});
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) await loadProfile(session.user);
 
-async function fetchProfile(user) {
-  currentUser = user;
-  const { data, error } = await sb.from('profiles').select('*').eq('id', user.id).single();
-  if (data) {
-    profile = data;
-    updateUI();
-    renderNav();
-  }
-}
-
-function updateUI() {
-  if (!profile) return;
-  document.getElementById('prof-username').textContent = profile.username;
-  document.getElementById('prof-roria-name').textContent = '@' + (profile.roria_username || 'trainer');
-  document.getElementById('prof-bio-text').textContent = profile.bio || "No bio set.";
-  document.getElementById('rec-wins').textContent = profile.wins || 0;
-  document.getElementById('rec-losses').textContent = profile.losses || 0;
-  document.getElementById('rec-draws').textContent = profile.draws || 0;
-  document.getElementById('rec-total').textContent = (profile.wins || 0) + (profile.losses || 0) + (profile.draws || 0);
-  updateAvatarDisplay(profile.avatar_url);
-}
-
-function renderNav() {
-  const nr = document.getElementById('navRight');
-  const ds = document.getElementById('drawerUserSection');
-  if (!profile) return;
-
-  const init = profile.username[0].toUpperCase();
-  const avHtml = (profile.avatar_url && profile.avatar_url.includes('http')) 
-    ? `<img src="${profile.avatar_url}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">`
-    : `<div class="av" style="width:28px; height:28px; border-radius:50%; background:var(--yellow); display:flex; align-items:center; justify-content:center; color:var(--red-dk); font-size:12px;">${init}</div>`;
-
-  if (nr) nr.innerHTML = `<div class="user-chip">${avHtml}<span>${profile.username}</span></div>`;
-  if (ds) ds.innerHTML = `<div style="font-weight:800; margin-bottom:10px;">${profile.username}</div><button class="btn-poke" style="font-size:10px; padding:8px;" onclick="handleLogout()">Log Out</button>`;
-}
-
-async function handleLogout() {
-  await sb.auth.signOut();
-  window.location.href = 'index.html';
-}
-
-function updateAvatarDisplay(url) {
-  const imgEl = document.getElementById('prof-av-img');
-  const letterEl = document.getElementById('prof-av-letter');
-  const container = document.getElementById('prof-av');
-
-  if (url && url.includes('http')) {
-    imgEl.src = url;
-    imgEl.style.display = 'block';
-    letterEl.style.display = 'none';
-    container.style.background = 'transparent'; // Remove background color if showing image
-  } else {
-    imgEl.style.display = 'none';
-    letterEl.style.display = 'flex';
-    container.style.background = 'var(--red)';
-    if(profile) letterEl.textContent = (profile.username || 'T')[0].toUpperCase();
-  }
-}
-
-async function uploadIcon(input) {
-  if (!input.files || input.files.length === 0) return;
-  
-  const file = input.files[0];
-  // Check file size (optional safety: 2MB limit)
-  if (file.size > 2 * 1024 * 1024) return toast("❌ File too large (Max 2MB)");
-
-  toast("⏳ Uploading...");
-  
-  // We use a clean name. Using just 'avatar' with upsert replaces the old one, 
-  // keeping your storage bucket from filling up with old images.
-  const fileExt = file.name.split('.').pop();
-  const fileName = `${currentUser.id}/avatar.${fileExt}`;
-
-  // 1. Upload to Storage
-  const { error: uploadError } = await sb.storage
-    .from('avatars')
-    .upload(fileName, file, { 
-      upsert: true // This is crucial: it allows you to update the existing file
+    sb.auth.onAuthStateChange(async (event, session) => {
+        if (session) await loadProfile(session.user);
+        else { currentUser = null; profile = null; renderNav(); }
     });
 
-  if (uploadError) {
-    console.error("Upload error:", uploadError);
-    return toast("❌ Upload failed");
-  }
-
-  // 2. Get the Public URL
-  const { data: urlData } = sb.storage.from('avatars').getPublicUrl(fileName);
-  const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`; // Cache-busting query string
-
-  // 3. Update the Profile Table
-  const { error: updateError } = await sb
-    .from('profiles')
-    .update({ avatar_url: publicUrl })
-    .eq('id', currentUser.id);
-
-  if (updateError) {
-    console.error("Profile update error:", updateError);
-    return toast("❌ Table update failed");
-  }
-
-  // 4. Update Local State and UI
-  profile.avatar_url = publicUrl;
-  updateUI(); 
-  renderNav();
-  toast("✅ Icon Updated!");
-}
-
-async function updateAccount() {
-  const newName = document.getElementById('update-user').value.trim();
-  if (!newName) return toast("Enter a name!");
-  const { error } = await sb.from('profiles').update({ username: newName }).eq('id', currentUser.id);
-  if (!error) { profile.username = newName; updateUI(); renderNav(); toast("✨ Name Updated!"); }
-}
-
-async function toggleBioEdit() {
-  const textEl = document.getElementById('prof-bio-text');
-  const inputEl = document.getElementById('prof-bio-input');
-  const btn = document.getElementById('edit-bio-btn');
-  if (inputEl.style.display === 'none') {
-    inputEl.value = profile.bio || "";
-    textEl.style.display = 'none'; inputEl.style.display = 'block'; btn.textContent = "Save Bio";
-  } else {
-    const newBio = inputEl.value.trim();
-    await sb.from('profiles').update({ bio: newBio }).eq('id', currentUser.id);
-    profile.bio = newBio; textEl.textContent = newBio || "No bio set.";
-    textEl.style.display = 'block'; inputEl.style.display = 'none'; btn.textContent = "Edit Bio";
-    toast("✨ Bio Updated!");
-  }
-}
-
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-function toggleDrawer() { document.getElementById('drawer').classList.toggle('open'); document.getElementById('overlay').classList.toggle('open'); }
-function closeDrawer() { document.getElementById('drawer').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
-
-/* ─── INIT ─── */
-window.addEventListener('DOMContentLoaded', async () => {
-  /* restore session */
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) await loadProfile(session.user);
-
-  /* listen for auth changes */
-  sb.auth.onAuthStateChange(async (event, session) => {
-    if (session) { await loadProfile(session.user); }
-    else { currentUser = null; profile = null; renderNav(); }
-  });
-
-  // Call these two to fill the page data
-  loadStats();
-  loadLeaderboard(); 
+    await init();
 });
 
-/* ─── PROFILE ─── */
 async function loadProfile(user) {
-  currentUser = user;
-  const { data, error } = await sb.from('profiles').select('*').eq('id', user.id).single();
-  if (error) console.error("Profile Fetch Error:", error);
-  profile = data;
-  renderNav();
+    currentUser = user;
+    const { data } = await sb.from('profiles').select('*').eq('id', user.id).single();
+    profile = data;
+    renderNav();
 }
 
-/* ─── NAV render ─── */
 function renderNav() {
-  const nr = document.getElementById('navRight');
-  const ds = document.getElementById('drawerUserSection');
-  if (!profile || !nr) return;
+    const nr = document.getElementById('navRight');
+    const ds = document.getElementById('drawerUserSection');
+    if (!profile || !nr) return;
 
-  const init = (profile.username || 'T')[0].toUpperCase();
-  
-  // Create the avatar HTML for the nav bar
-  const avHtml = (profile.avatar_url && profile.avatar_url.includes('http')) 
-    ? `<img src="${profile.avatar_url}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border: 2px solid #fff;">`
-    : `<div class="av">${init}</div>`;
+    const initLetter = (profile.username || 'T')[0].toUpperCase();
+    const avHtml = (profile.avatar_url && profile.avatar_url.includes('http'))
+        ? `<img src="${profile.avatar_url}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid #fff;">`
+        : `<div class="av">${initLetter}</div>`;
 
-  // Update Top Nav
-  nr.innerHTML = `
-    <div class="user-chip" onclick="window.location.href='account.html'">
-      ${avHtml}
-      <span class="uname">${profile.username}</span>
-    </div>`;
+    nr.innerHTML = `<div class="user-chip" onclick="window.location.href='account.html'">${avHtml}<span class="uname">${profile.username}</span></div>`;
 
-  // Update Sidebar Drawer
-  if (ds) {
-    ds.innerHTML = `
-      <div class="drawer-user-section">
-        <div class="drawer-user-row">
-          ${avHtml.replace('28px','38px').replace('28px','38px')} 
-          <div>
-            <div class="drawer-uname">${profile.username}</div>
-            <div class="drawer-suname">@${profile.roria_username || 'trainer'}</div>
-          </div>
-        </div>
-        <button class="drawer-logout" onclick="handleLogout()">Log Out</button>
-      </div>`;
-  }
+    if (ds) ds.innerHTML = `
+        <div class="drawer-user-section">
+            <div class="drawer-user-row">
+                <div class="drawer-av">${initLetter}</div>
+                <div>
+                    <div class="drawer-uname">${profile.username}</div>
+                    <div class="drawer-suname">@${profile.roria_username || 'trainer'}</div>
+                </div>
+            </div>
+            <button class="drawer-logout" onclick="handleLogout()">Log Out</button>
+        </div>`;
 }
-/* ─── SIGN UP ─── */
-async function handleSignup() {
-  clearErrors('su');
-  const username  = v('su-user');
-  const roria     = v('su-roria');
-  const email     = v('su-email');
-  const pass      = v('su-pass');
-  const confirm   = v('su-confirm');
 
-  if (!username || !roria || pass.length < 8 || pass !== confirm) {
-    if (!username) setErr('sf-user');
-    if (!roria) setErr('sf-roria');
-    if (pass.length < 8) setErr('sf-pass');
-    if (pass !== confirm) setErr('sf-confirm');
-    return;
-  }
+async function handleLogout() {
+    await sb.auth.signOut();
+    closeDrawer();
+    toast('👋 Logged out');
+    location.reload();
+}
 
-  setBtnLoading('su-btn', true);
+function toggleDrawer() {
+    document.getElementById('drawer').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('open');
+    document.getElementById('hamburger').classList.toggle('open');
+}
+function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+    document.getElementById('hamburger').classList.remove('open');
+}
+function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
 
-  // Create a pseudo-email if none provided
-  const authEmail = email || `${username.toLowerCase().replace(/\s+/g,'_')}@rbg.roria.local`;
+/* ══════════════════════════════════════════════
+   MAIN INIT
+══════════════════════════════════════════════ */
+async function init() {
+    if (!tournamentId) {
+        document.getElementById('t-name').textContent = 'Tournament not found.';
+        return;
+    }
 
-  const { data, error } = await sb.auth.signUp({
-    email: authEmail,
-    password: pass,
-    options: { data: { username, roria_username: roria } }
-  });
+    const { data: t } = await sb.from('tournaments').select('*').eq('id', tournamentId).single();
+    if (!t) { document.getElementById('t-name').textContent = 'Tournament not found.'; return; }
 
-  if (error) {
-    console.error("Signup Auth Error:", error);
-    showStatus('su-status', 'err', error.message);
-    setBtnLoading('su-btn', false);
-    return;
-  }
+    document.getElementById('t-name').textContent = t.name;
+    document.getElementById('t-status').textContent = `STATUS: ${t.status.toUpperCase()}`;
 
-  if (data.user) {
-    const { error: profileError } = await sb.from('profiles').upsert({
-      id: data.user.id,
-      username: username,
-      roria_username: roria,
-      auth_email: authEmail
+    // Fetch participants
+    const { data: participantsRaw } = await sb
+        .from('tournament_participants')
+        .select('*')
+        .eq('tournament_id', tournamentId)
+        .order('created_at', { ascending: true });
+
+    // Fetch profiles for each participant separately
+    let participants = [];
+    if (participantsRaw && participantsRaw.length > 0) {
+        const profileIds = participantsRaw.map(p => p.profile_id);
+        const { data: profilesData } = await sb
+            .from('profiles')
+            .select('id, username')
+            .in('id', profileIds);
+
+        participants = participantsRaw.map(p => ({
+            ...p,
+            profiles: profilesData?.find(pr => pr.id === p.profile_id) || null
+        }));
+    }
+
+    // Fetch matches from tournament_matches
+    const { data: matchesRaw } = await sb
+        .from('tournament_matches')
+        .select('*')
+        .eq('tournament_id', tournamentId);
+
+    const matches = matchesRaw || [];
+    const list    = participants || [];
+
+    document.getElementById('t-players-count').textContent = `PLAYERS: ${list.length} / ${t.max_players}`;
+
+    // Route to the correct phase
+    if (t.status === 'upcoming') {
+        handleUpcomingPhase(t);
+    } else if (t.status === 'registration') {
+        handleRegistrationPhase(t, list);
+    } else if (t.status === 'group_stage') {
+        handleGroupPhase(t, list, matches);
+    } else if (t.status === 'knockout') {
+        handleGroupPhase(t, list, matches); // show groups + bracket
+    } else {
+        // Fallback for any unknown status — show countdown if start_date is in future
+        if (t.start_date && new Date(t.start_date) > new Date()) {
+            handleUpcomingPhase(t);
+        } else {
+            document.getElementById('t-name').textContent = t.name;
+        }
+    }
+}
+
+/* ══════════════════════════════════════════════
+   PHASE 0: UPCOMING
+══════════════════════════════════════════════ */
+function handleUpcomingPhase(t) {
+    document.getElementById('upcoming-section').style.display = 'block';
+    document.getElementById('countdown-box').style.display = 'block';
+    document.getElementById('cd-label').textContent = 'REGISTRATION OPENS IN';
+
+    startCountdown(t.start_date, () => {
+        // When countdown hits 0, reload — cron job will have flipped status
+        setTimeout(() => location.reload(), 2000);
+    });
+}
+
+/* ══════════════════════════════════════════════
+   PHASE 1: REGISTRATION
+══════════════════════════════════════════════ */
+function handleRegistrationPhase(t, participants) {
+    document.getElementById('registration-section').style.display = 'block';
+    document.getElementById('countdown-box').style.display = 'block';
+    document.getElementById('cd-label').textContent = 'TOURNAMENT STARTS IN';
+
+    startCountdown(t.start_date, async () => {
+        // Auto-transition: update status in DB, then reload
+        await sb.from('tournaments')
+            .update({ status: 'group_stage' })
+            .eq('id', tournamentId)
+            .eq('status', 'registration')
+            .lte('start_date', new Date().toISOString());
+        setTimeout(() => location.reload(), 1500);
     });
 
-    if (profileError) {
-      console.error("Profile Creation Error:", profileError);
-      showStatus('su-status', 'err', "Account made, but profile failed. Please try logging in.");
+    // Join button
+    const regZone = document.getElementById('registration-zone');
+    const isJoined = participants.some(p => currentUser && p.profile_id === currentUser.id);
+    if (isJoined) {
+        regZone.innerHTML = `<button class="btn-poke" style="background:var(--green);cursor:default;">✓ YOU ARE REGISTERED</button>`;
+    } else if (currentUser) {
+        regZone.innerHTML = `<button class="btn-poke" onclick="joinTournament()">JOIN TOURNAMENT</button>`;
     } else {
-      await loadProfile(data.user);
-      closeModal('signup');
-      toast('🎮 Welcome, ' + username + '!');
+        regZone.innerHTML = `<button class="btn-poke" style="background:var(--muted);cursor:default;">LOG IN TO JOIN</button>`;
     }
-  }
-  setBtnLoading('su-btn', false);
+
+    // Player list
+    const listEl = document.getElementById('player-list');
+    if (participants.length === 0) {
+        listEl.innerHTML = `<li style="color:var(--muted); font-weight:700; padding:12px 0;">No trainers registered yet. Be the first!</li>`;
+    } else {
+        listEl.innerHTML = participants.map((p, i) => `
+            <li class="player-row">
+                <span class="player-num">${i + 1}</span>
+                <span class="player-name">${p.profiles?.username || 'Unknown'}</span>
+                <span class="player-date">Registered ${formatDate(p.created_at)}</span>
+            </li>
+        `).join('');
+    }
 }
 
-/* ─── LOG IN ─── */
-async function handleLogin() {
-  clearErrors('li');
-  const username = v('li-user');
-  const pass     = v('li-pass');
+async function joinTournament() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) return toast('Please log in first!');
 
-  if (!username || !pass) {
-    if (!username) setErr('lf-user');
-    if (!pass) setErr('lf-pass');
-    return;
-  }
+    const { error } = await sb.from('tournament_participants').insert({
+        tournament_id: tournamentId,
+        profile_id: session.user.id
+    });
 
-  setBtnLoading('li-btn', true);
-
-  // 1. Find the email used for this username
-  const { data: prof, error: fetchError } = await sb
-    .from('profiles')
-    .select('auth_email')
-    .eq('username', username)
-    .single();
-
-  if (fetchError || !prof) {
-    showStatus('li-status', 'err', 'Trainer not found.');
-    setBtnLoading('li-btn', false);
-    return;
-  }
-
-  // 2. Sign in with that email
-  const { error: loginError } = await sb.auth.signInWithPassword({
-    email: prof.auth_email,
-    password: pass,
-  });
-
-  if (loginError) {
-    showStatus('li-status', 'err', 'Incorrect password.');
-    setBtnLoading('li-btn', false);
-    return;
-  }
-
-  setBtnLoading('li-btn', false);
-  closeModal('login');
-  toast('⚡ Logged in!');
+    if (error) {
+        if (error.code === '23505') toast('⚠️ You are already registered!');
+        else toast('❌ ' + error.message);
+    } else {
+        toast('✅ You are registered!');
+        setTimeout(() => location.reload(), 1000);
+    }
 }
 
-/* ─── LOG OUT ─── */
-async function handleLogout() {
-  await sb.auth.signOut();
-  closeDrawer();
-  toast('👋 Logged out');
-  location.reload(); // Refresh to clear private data
+/* ══════════════════════════════════════════════
+   PHASE 2: GROUP STAGE + BRACKET
+══════════════════════════════════════════════ */
+function handleGroupPhase(t, participants, matches) {
+    document.getElementById('group-section').style.display = 'block';
+
+    const groups = buildGroups(participants);
+    renderGroups(groups, matches);
+    renderGroupMatches(groups, matches);
+
+    document.getElementById('bracket-section').style.display = 'block';
+    renderKnockoutBracket(groups, matches);
+}
+
+/* ══════════════════════════════════════════════
+   COUNTDOWN HELPER
+══════════════════════════════════════════════ */
+function startCountdown(targetDate, onZero) {
+    const endTime = new Date(targetDate).getTime();
+    function tick() {
+        const now  = Date.now();
+        const diff = endTime - now;
+        if (diff <= 0) {
+            ['cd-days','cd-hours','cd-mins','cd-secs'].forEach(id =>
+                document.getElementById(id).textContent = '00');
+            clearInterval(iv);
+            if (onZero) onZero();
+            return;
+        }
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000)  / 60000);
+        const s = Math.floor((diff % 60000)    / 1000);
+        document.getElementById('cd-days').textContent  = String(d).padStart(2,'0');
+        document.getElementById('cd-hours').textContent = String(h).padStart(2,'0');
+        document.getElementById('cd-mins').textContent  = String(m).padStart(2,'0');
+        document.getElementById('cd-secs').textContent  = String(s).padStart(2,'0');
+    }
+    const iv = setInterval(tick, 1000);
+    tick();
+}
+
+/* ══════════════════════════════════════════════
+   POINTS CALCULATOR
+   Uses tournament_matches columns:
+   player1_id, player2_id, winner_id, is_draw
+   Win = 3 pts, Draw = 1 pt each
+══════════════════════════════════════════════ */
+function calcPoints(group, matches) {
+    const pts = {};
+    group.forEach(p => pts[p.profile_id] = 0);
+
+    matches.forEach(m => {
+        if (m.is_draw) {
+            if (pts[m.player1_id] !== undefined) pts[m.player1_id] += 1;
+            if (pts[m.player2_id] !== undefined) pts[m.player2_id] += 1;
+        } else if (m.winner_id) {
+            if (pts[m.winner_id] !== undefined) pts[m.winner_id] += 3;
+        }
+    });
+
+    return pts;
+}
+
+/* ════════════════════════════════════════
+   GROUP BUILDING LOGIC
+   - <6 players  → 1 group
+   - 6+ players  → split into groups of 3–4
+════════════════════════════════════════ */
+function buildGroups(players) {
+    const n = players.length;
+    if (n < 2) return [players];
+    if (n < 6) return [players.slice()];
+
+    let numGroups = Math.ceil(n / 4);
+    if (numGroups < 2) numGroups = 2;
+
+    const shuffled = shuffle(players.slice());
+    const groups = Array.from({ length: numGroups }, () => []);
+    shuffled.forEach((p, i) => groups[i % numGroups].push(p));
+    return groups;
+}
+
+/* ════════════════════════════════════════
+   RENDER GROUPS (with real points)
+════════════════════════════════════════ */
+function renderGroups(groups, matches) {
+    const container = document.getElementById('groups-container');
+    container.innerHTML = groups.map((group, gi) => {
+
+        const pts = calcPoints(group, matches);
+
+        // Sort by points descending
+        const sorted = [...group].sort((a, b) =>
+            (pts[b.profile_id] || 0) - (pts[a.profile_id] || 0)
+        );
+
+        const rows = sorted.map((p, pi) => {
+            const advancing = pi < 2;
+            const points    = pts[p.profile_id] || 0;
+            return `
+                <tr class="${advancing ? 'advancing' : ''}">
+                    <td class="rank">${advancing ? '→' : pi + 1}</td>
+                    <td>${p.profiles?.username || 'Unknown'}${advancing ? '<span class="advancing-badge">ADV</span>' : ''}</td>
+                    <td class="pts">${points}</td>
+                </tr>`;
+        }).join('');
+
+        return `
+            <div class="group-card">
+                <div class="group-card-header">
+                    Group ${String.fromCharCode(65 + gi)}
+                    <span>${group.length} players</span>
+                </div>
+                <table class="group-table">
+                    <thead><tr>
+                        <th></th>
+                        <th>Player</th>
+                        <th style="text-align:center;">Pts</th>
+                    </tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>`;
+    }).join('');
+}
+
+/* ════════════════════════════════════════
+   RENDER GROUP MATCHES (with real scores)
+════════════════════════════════════════ */
+function renderGroupMatches(groups, matches) {
+    const container = document.getElementById('group-matches-container');
+    let html = '';
+
+    groups.forEach((group, gi) => {
+        html += `<div style="margin-bottom:20px;">
+            <div style="font-family:'Press Start 2P',monospace; font-size:9px; color:var(--muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">
+                Group ${String.fromCharCode(65 + gi)} Matches
+            </div>`;
+
+        const pairs = getRoundRobinPairs(group);
+        pairs.forEach(([a, b]) => {
+            // Find this match in DB (either player order)
+            const m = matches.find(x =>
+                (x.player1_id === a.profile_id && x.player2_id === b.profile_id) ||
+                (x.player1_id === b.profile_id && x.player2_id === a.profile_id)
+            );
+
+            let resultHtml = `<span class="match-result" style="margin-left:12px;">TBD</span>`;
+            let styleA = '';
+            let styleB = '';
+
+            if (m) {
+                // Determine which player is player1 in DB
+                const scoreA = m.player1_id === a.profile_id ? m.player1_score : m.player2_score;
+                const scoreB = m.player1_id === b.profile_id ? m.player1_score : m.player2_score;
+
+                if (m.is_draw) {
+                    resultHtml = `<span class="match-result" style="margin-left:12px; color:var(--muted);">${scoreA} - ${scoreB}</span>`;
+                } else if (m.winner_id) {
+                    resultHtml = `<span class="match-result" style="margin-left:12px; color:var(--green);">${scoreA} - ${scoreB}</span>`;
+                    if (m.winner_id === a.profile_id) styleA = 'color:var(--green);';
+                    if (m.winner_id === b.profile_id) styleB = 'color:var(--green);';
+                }
+            }
+
+            html += `
+                <div class="match-card">
+                    <span class="match-player" style="${styleA}">${a.profiles?.username || 'Unknown'}</span>
+                    <span class="match-vs">VS</span>
+                    <span class="match-player right" style="${styleB}">${b.profiles?.username || 'Unknown'}</span>
+                    ${resultHtml}
+                </div>`;
+        });
+
+        html += `</div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+/* ════════════════════════════════════════
+   ROUND ROBIN PAIRS
+════════════════════════════════════════ */
+function getRoundRobinPairs(group) {
+    const pairs = [];
+    for (let i = 0; i < group.length; i++) {
+        for (let j = i + 1; j < group.length; j++) {
+            pairs.push([group[i], group[j]]);
+        }
+    }
+    return pairs;
+}
+
+/* ════════════════════════════════════════
+   KNOCKOUT BRACKET
+   Top 2 from each group advance.
+   1st of group X faces 2nd of different group.
+════════════════════════════════════════ */
+function renderKnockoutBracket(groups, matches) {
+    const container = document.getElementById('bracket-container');
+
+    // Use points-sorted order so bracket reflects actual standings
+    const sortedGroups = groups.map(group => {
+        const pts = calcPoints(group, matches);
+        return [...group].sort((a, b) => (pts[b.profile_id] || 0) - (pts[a.profile_id] || 0));
+    });
+
+    const firsts  = sortedGroups.map(g => g[0]);
+    const seconds = sortedGroups.map(g => g[1] ?? null);
+    const matchups = buildFirstRoundMatchups(firsts, seconds, sortedGroups.length);
+
+    let html = '';
+
+    if (sortedGroups.length === 1) {
+        html += `
+            <div class="bracket-round">
+                <div class="bracket-round-title">⚡ Final</div>
+                ${renderBracketMatch(firsts[0], seconds[0])}
+            </div>`;
+        container.innerHTML = html;
+        return;
+    }
+
+    if (sortedGroups.length === 2) {
+        html += `
+            <div class="bracket-round">
+                <div class="bracket-round-title">🏅 Semi-Finals</div>
+                ${matchups.map(([a, b]) => renderBracketMatch(a, b)).join('')}
+            </div>
+            <div class="bracket-round">
+                <div class="bracket-round-title">🏆 Final</div>
+                ${renderBracketMatch(null, null, 'Winner SF1', 'Winner SF2')}
+            </div>`;
+        container.innerHTML = html;
+        return;
+    }
+
+    let currentMatchups = matchups;
+    let roundNum = 1;
+    const roundNames = getRoundNames(currentMatchups.length);
+
+    while (currentMatchups.length >= 1) {
+        const roundLabel = roundNames.shift() || `Round ${roundNum}`;
+        html += `<div class="bracket-round"><div class="bracket-round-title">${roundLabel}</div>`;
+        html += currentMatchups.map(([a, b]) => renderBracketMatch(a, b, null, null, roundNum === 1)).join('');
+        html += `</div>`;
+
+        const nextCount = Math.ceil(currentMatchups.length / 2);
+        if (nextCount < 1) break;
+        currentMatchups = Array.from({ length: nextCount }, () => [null, null]);
+        roundNum++;
+        if (roundNames.length === 0) break;
+    }
+
+    container.innerHTML = html;
+}
+
+function buildFirstRoundMatchups(firsts, seconds, numGroups) {
+    const matchups = [];
+    if (numGroups === 1) { matchups.push([firsts[0], seconds[0]]); return matchups; }
+    if (numGroups === 2) {
+        matchups.push([firsts[0], seconds[1]]);
+        matchups.push([firsts[1], seconds[0]]);
+        return matchups;
+    }
+    const shiftedSeconds = [...seconds.slice(1), seconds[0]];
+    for (let i = 0; i < numGroups; i++) {
+        matchups.push([firsts[i], shiftedSeconds[i]]);
+    }
+    return matchups;
+}
+
+function renderBracketMatch(playerA, playerB, labelA = null, labelB = null) {
+    const nameA = playerA ? (playerA.profiles?.username || 'Unknown') : (labelA || 'TBD');
+    const nameB = playerB ? (playerB.profiles?.username || 'Unknown') : (labelB || 'TBD');
+    const tbdA  = !playerA && !labelA;
+    const tbdB  = !playerB && !labelB;
+
+    return `
+        <div class="bracket-match">
+            <div class="bracket-slot ${tbdA ? 'tbd' : ''}">
+                <span class="slot-name">${nameA}</span>
+                <span class="slot-pts">-</span>
+            </div>
+            <div class="bracket-slot ${tbdB ? 'tbd' : ''}">
+                <span class="slot-name">${nameB}</span>
+                <span class="slot-pts">-</span>
+            </div>
+        </div>`;
+}
+
+function getRoundNames(numMatchups) {
+    const names = [];
+    let n = numMatchups;
+    while (n >= 1) {
+        if (n === 1)      names.unshift('🏆 Final');
+        else if (n === 2) names.unshift('🏅 Semi-Finals');
+        else if (n <= 4)  names.unshift('⚔️ Quarter-Finals');
+        else              names.unshift(`Round of ${n * 2}`);
+        n = Math.ceil(n / 2);
+        if (n === numMatchups) break;
+    }
+    return names.reverse();
+}
+
+/* ══════════════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════════════ */
+function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function formatDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 </script>
 </body>

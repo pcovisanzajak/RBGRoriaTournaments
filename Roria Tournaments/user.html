@@ -1,0 +1,548 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RBG Roria Tournaments</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --red: #e3350d; --red-dk: #b02a0a; --yellow: #f7c948;
+    --blue: #2c6fad; --white: #f8f8f8; --off: #ece8df;
+    --card: #ffffff; --border: #c8c0b0; --text: #2a2a2a;
+    --muted: #7a7265; --green: #4caf50; --nav-h: 60px;
+    --shadow: 0 4px 0 rgba(0,0,0,0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: var(--off); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+  /* ══════════════════ NAV ══════════════════ */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--nav-h);
+    background: var(--red);
+    border-bottom: 4px solid var(--red-dk);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 16px;
+    z-index: 200;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+
+  /* hamburger — left */
+  .hamburger {
+    width: 40px; height: 40px;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center; gap: 5px;
+    cursor: pointer;
+    border-radius: 8px;
+    border: 2px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+    transition: background .2s;
+    flex-shrink: 0;
+  }
+  .hamburger:hover { background: rgba(255,255,255,0.2); }
+  .hamburger span {
+    display: block;
+    width: 18px; height: 2px;
+    background: #fff;
+    border-radius: 2px;
+    transition: transform .3s, opacity .3s;
+    transform-origin: center;
+  }
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* logo — centre */
+  .nav-logo {
+    position: absolute;
+    left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+  .nav-logo .top-line {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: var(--yellow);
+    letter-spacing: 3px;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+  }
+  .nav-logo .bottom-line {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    color: #fff;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+  }
+
+  /* user chip — right */
+  .nav-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .nav-btn {
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .nav-btn-ghost {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.4);
+    color: #fff;
+  }
+  .nav-btn-ghost:hover { background: rgba(255,255,255,0.25); }
+  .nav-btn-solid {
+    background: var(--yellow);
+    border-color: #d4a017;
+    color: #2a2a2a;
+    box-shadow: 0 3px 0 #d4a017;
+  }
+  .nav-btn-solid:hover { transform: translateY(1px); box-shadow: 0 2px 0 #d4a017; }
+
+  .user-chip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 14px 5px 7px;
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .user-chip:hover { background: rgba(255,255,255,0.25); }
+  .user-chip .av {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--yellow);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800; color: var(--red-dk);
+    border: 2px solid #fff;
+    font-family: 'Nunito', sans-serif;
+  }
+  .user-chip .uname { color: #fff; font-weight: 800; font-size: 13px; }
+
+  /* ══════════════════ DRAWER ══════════════════ */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; opacity: 0; pointer-events: none; transition: 0.3s; }
+  .overlay.open { opacity: 1; pointer-events: all; }
+  .drawer { position: fixed; top: 0; left: 0; width: 280px; height: 100%; background: #fff; border-right: 4px solid var(--border); z-index: 400; transform: translateX(-100%); transition: 0.3s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; }
+  .drawer.open { transform: translateX(0); }
+  .drawer-item { display: flex; align-items: center; gap: 14px; padding: 15px 20px; cursor: pointer; font-weight: 700; color: var(--text); text-decoration: none; border-bottom: 1px solid var(--off); }
+  .drawer-item:hover { background: var(--off); color: var(--red); }
+
+  /* ══════════════════ LAYOUT ══════════════════ */
+  .hero { padding-top: calc(var(--nav-h) + 40px); display: flex; justify-content: center; padding-bottom: 60px; }
+  .profile-layout { display: grid; grid-template-columns: 320px 1fr; gap: 30px; width: 100%; max-width: 1100px; padding: 0 20px; align-items: start; }
+
+  .profile-card { background: #fff; border: 3px solid var(--border); border-radius: 18px; padding: 24px; box-shadow: var(--shadow); margin-bottom: 20px; }
+  .avatar-container { position: relative; width: 110px; height: 110px; margin: 0 auto 16px; }
+  .profile-av { width: 100px; height: 100px; border-radius: 50%; background: var(--red); border: 5px solid var(--red-dk); display: flex; align-items: center; justify-content: center; font-size: 40px; color: #fff; font-weight: 800; object-fit: cover; }
+  .edit-av-btn { position: absolute; bottom: 0; right: 0; width: 34px; height: 34px; background: var(--yellow); border: 3px solid var(--text); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+
+  .prof-user { font-family: 'Press Start 2P'; font-size: 16px; margin-bottom: 5px; text-align: center; }
+  .prof-roria { color: var(--muted); font-weight: 700; margin-bottom: 20px; text-align: center; display: block; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 24px; }
+  .stat-card { background: #fff; border: 3px solid var(--border); border-radius: 14px; padding: 15px; text-align: center; box-shadow: var(--shadow); }
+  .stat-val { font-family: 'Press Start 2P'; font-size: 18px; display: block; }
+  .stat-label { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; }
+
+  .field { margin-bottom: 15px; text-align: left; }
+  .field label { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
+  .field input { width: 100%; background: var(--off); border: 2px solid var(--border); border-radius: 10px; padding: 10px; font-weight: 700; outline: none; }
+  .btn-poke { width: 100%; padding: 12px; border-radius: 10px; border: none; font-weight: 800; cursor: pointer; text-transform: uppercase; background: var(--red); color: #fff; box-shadow: 0 4px 0 var(--red-dk); transition: 0.1s; }
+  .btn-poke:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--red-dk); }
+
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #2a2a2a; color: #fff; padding: 12px 24px; border-radius: 30px; opacity: 0; transition: 0.3s; z-index: 999; pointer-events: none; }
+  .toast.show { opacity: 1; }
+
+  @media (max-width: 900px) { .profile-layout { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: 1fr 1fr; } }
+
+  /* ══════════════════ OVERLAY + DRAWER ══════════════════ */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 300;
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s;
+  }
+  .overlay.open { opacity: 1; pointer-events: all; }
+
+  .drawer {
+    position: fixed;
+    top: 0; left: 0;
+    width: 280px; height: 100%;
+    background: #fff;
+    border-right: 4px solid var(--border);
+    z-index: 400;
+    transform: translateX(-100%);
+    transition: transform .32s cubic-bezier(.4,0,.2,1);
+    display: flex; flex-direction: column;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+  }
+  .drawer.open { transform: translateX(0); }
+
+  .drawer-header {
+    background: var(--red);
+    border-bottom: 4px solid var(--red-dk);
+    padding: 18px 20px;
+    display: flex; flex-direction: column; align-items: flex-start;
+  }
+  .drawer-header .site-tag {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px;
+    color: var(--yellow);
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+  .drawer-header .site-name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    color: #fff;
+    line-height: 1.6;
+  }
+
+  .drawer-section {
+    padding: 14px 20px 6px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .drawer-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 13px 20px;
+    cursor: pointer;
+    border-left: 4px solid transparent;
+    transition: all .15s;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .drawer-item:hover {
+    background: var(--off);
+    border-left-color: var(--red);
+    color: var(--red);
+  }
+  .drawer-item .di-icon { font-size: 20px; width: 26px; text-align: center; }
+
+  .drawer-divider { height: 1px; background: var(--border); margin: 8px 20px; }
+
+  /* logged-in section in drawer */
+  /* logged-in section in drawer */
+  .drawer-user-section {
+    padding: 16px 20px;
+    background: var(--off);
+    border-top: 1px solid var(--border);
+    margin-top: auto; /* Pushes it to the bottom */
+  }
+  .drawer-user-row { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    margin-bottom: 10px; 
+  }
+  .drawer-av {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--red);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 800; color: #fff;
+    border: 3px solid var(--red-dk);
+  }
+  .drawer-uname { font-weight: 800; font-size: 15px; color: var(--text); }
+  .drawer-suname { font-size: 12px; color: var(--muted); }
+  .drawer-logout {
+    width: 100%;
+    padding: 9px;
+    border-radius: 8px;
+    background: transparent;
+    border: 2px solid var(--border);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .drawer-logout:hover { border-color: var(--red); color: var(--red); }
+
+  /* user chip — right */
+  .nav-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    
+  }
+
+</style>
+</head>
+<body>
+
+<body>
+
+<nav>
+  <div class="hamburger" id="hamburger" onclick="toggleDrawer()">
+    <span></span><span></span><span></span>
+  </div>
+
+  <div class="nav-logo">
+    <span class="top-line">RBG</span>
+    <span class="bottom-line">RORIA TOURNAMENTS</span>
+  </div>
+
+  <div class="nav-right" id="navRight">
+    <button class="nav-btn nav-btn-ghost" onclick="openModal('login')">Log In</button>
+    <button class="nav-btn nav-btn-solid" onclick="openModal('signup')">Sign Up</button>
+  </div>
+</nav>
+
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="site-tag">RBG</div>
+    <div class="site-name">RORIA<br>TOURNAMENTS</div>
+  </div>
+
+  <div class="drawer-section">Menu</div>
+  <a class="drawer-item" href="index.html"><span class="di-icon">🏠</span> Home</a>
+  <a class="drawer-item" href="leaderboard.html"><span class="di-icon">🏆</span> Leaderboard</a>
+  <a class="drawer-item" href="#"><span class="di-icon">⚡</span> Live Tournaments</a>
+  <a class="drawer-item" href="#"><span class="di-icon">📁</span> Past Tournaments</a>
+
+  <div class="drawer-divider"></div>
+
+  <div class="drawer-section">Info</div>
+  <a class="drawer-item" href="#"><span class="di-icon">📰</span> News</a>
+  <a class="drawer-item" href="#"><span class="di-icon">👥</span> About Us</a>
+
+  <div id="drawerUserSection"></div>
+</div>
+
+<div class="hero">
+  <div class="container">
+    <div class="profile-layout">
+  
+      <div class="profile-side">
+        <div class="profile-card">
+          <div class="avatar-container">
+            <div class="profile-av" id="prof-av">
+              <img id="prof-av-img" src="" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:none;">
+              <span id="prof-av-letter">T</span>
+            </div>
+            </div>
+
+          <h2 class="prof-user" id="prof-username">Trainer Name</h2>
+          <p class="prof-roria" id="prof-roria-name">@roria_handle</p>
+          
+          <div class="prof-bio-box">
+            <label class="sec-eyebrow" style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px;">Trainer Bio</label>
+            <p id="prof-bio-text" style="font-size: 14px; margin-bottom: 10px;">Loading bio...</p>
+            </div>
+        </div>
+
+        </div>
+
+      <div class="profile-main">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-val" id="rec-wins" style="color: var(--green)">0</span>
+            <span class="stat-label">Wins</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-val" id="rec-losses">0</span>
+            <span class="stat-label">Losses</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-val" id="rec-draws" style="color: var(--blue)">0</span>
+            <span class="stat-label">Draws</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-val" id="rec-total" style="color: var(--text)">0</span>
+            <span class="stat-label">Total Games</span>
+          </div>
+        </div>
+
+        <div class="history-section">
+          <div class="sec-head">
+            <span class="sec-eyebrow">Participation</span>
+            <h2 class="sec-title">Tournament History</h2>
+          </div>
+          <div class="lb-card">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tournament</th>
+                  <th>Date</th>
+                  <th>Result</th>
+                </tr>
+              </thead>
+              <tbody id="tournament-history-body">
+                <tr>
+                  <td colspan="3" style="text-align:center; color: var(--muted); padding: 40px;">No tournament data found.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL  = 'https://lvtmmtvxozabealfxqmy.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_tJbIaorQ_wp3Qt5_Vxwwgw_x7dcGc7-';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// 1. Get the ID from the URL (user.html?id=...)
+const params = new URLSearchParams(window.location.search);
+const targetUserId = params.get('id');
+
+let currentUser = null; // Still needed to render your name in the Nav
+
+window.addEventListener('DOMContentLoaded', async () => {
+  // A. Handle the Top Navigation (So YOU stay logged in at the top)
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    renderNav(); // This fills the top-right corner with YOUR info
+  }
+
+  // B. Handle the Profile Content (This fills the page with the TARGET info)
+  if (targetUserId) {
+    loadTargetProfile(targetUserId);
+  } else {
+    document.body.innerHTML = "<h1 style='text-align:center; margin-top:100px;'>No Trainer ID Provided</h1>";
+  }
+});
+
+// This function fetches the specific person you are looking at
+async function loadTargetProfile(id) {
+  const { data: profile, error } = await sb
+    .from('profiles')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle(); // maybeSingle is safer if the ID is wrong
+
+  if (error || !profile) {
+    console.error("Profile not found");
+    return;
+  }
+
+  // Fill the HTML with the Target's data
+  document.getElementById('prof-username').textContent = profile.username;
+  document.getElementById('prof-roria-name').textContent = '@' + (profile.roria_username || 'trainer');
+  document.getElementById('prof-bio-text').textContent = profile.bio || "No bio set.";
+  document.getElementById('rec-wins').textContent = profile.wins || 0;
+  document.getElementById('rec-losses').textContent = profile.losses || 0;
+  document.getElementById('rec-draws').textContent = profile.draws || 0;
+  document.getElementById('rec-total').textContent = (profile.wins || 0) + (profile.losses || 0) + (profile.draws || 0);
+  
+  updateAvatarDisplay(profile.avatar_url, profile.username);
+}
+
+// Fixed Avatar display to use target user's data
+function updateAvatarDisplay(url, username) {
+  const imgEl = document.getElementById('prof-av-img');
+  const letterEl = document.getElementById('prof-av-letter');
+  const container = document.getElementById('prof-av');
+
+  if (url && url.includes('http')) {
+    imgEl.src = url;
+    imgEl.style.display = 'block';
+    letterEl.style.display = 'none';
+    container.style.background = 'transparent';
+  } else {
+    imgEl.style.display = 'none';
+    letterEl.style.display = 'flex';
+    container.style.background = 'var(--red)';
+    letterEl.textContent = (username || 'T')[0].toUpperCase();
+  }
+}
+
+// Helper to keep the Nav bar working for YOU
+// Helper to keep the Nav bar working for YOU
+async function renderNav() {
+  const nr = document.getElementById('navRight');
+  const ds = document.getElementById('drawerUserSection');
+  
+  if (!currentUser) return; // Exit if not logged in
+
+  // Fetch YOUR profile for the top-right chip
+  const { data: myProf } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  if (!myProf) return;
+
+  const init = myProf.username[0].toUpperCase();
+  
+  // 1. Setup the Avatar HTML
+  const avHtml = (myProf.avatar_url && myProf.avatar_url.includes('http')) 
+    ? `<img src="${myProf.avatar_url}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border: 2px solid #fff;">`
+    : `<div class="av" style="width:28px; height:28px; border-radius:50%; background:var(--yellow); display:flex; align-items:center; justify-content:center; color:var(--red-dk); font-size:12px; border: 2px solid #fff;">${init}</div>`;
+
+  // 2. Update Top Navigation (The Chip)
+  if (nr) {
+    nr.innerHTML = `
+      <div class="user-chip" onclick="window.location.href='account.html'">
+        ${avHtml}
+        <span class="uname">${myProf.username}</span>
+      </div>`;
+  }
+
+  // 3. Update Sidebar Drawer (THE PART THAT WAS BROKEN)
+  if (ds) {
+    // We create a larger avatar for the drawer
+    const drawerAvHtml = (myProf.avatar_url && myProf.avatar_url.includes('http')) 
+      ? `<img src="${myProf.avatar_url}" style="width:38px; height:38px; border-radius:50%; object-fit:cover; border: 3px solid var(--red-dk);">`
+      : `<div class="drawer-av">${init}</div>`;
+
+    ds.innerHTML = `
+      <div class="drawer-user-section">
+        <div class="drawer-user-row">
+          ${drawerAvHtml}
+          <div>
+            <div class="drawer-uname">${myProf.username}</div>
+            <div class="drawer-suname">@${myProf.roria_username || 'trainer'}</div>
+          </div>
+        </div>
+        <button class="drawer-logout" onclick="handleLogout()">LOG OUT</button>
+      </div>`;
+  }
+}
+
+async function handleLogout() {
+  await sb.auth.signOut();
+  window.location.href = 'index.html';
+}
+
+// Drawer toggles
+function toggleDrawer() { document.getElementById('drawer').classList.toggle('open'); document.getElementById('overlay').classList.toggle('open'); }
+function closeDrawer() { document.getElementById('drawer').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
+</script>
+
+</body>
+</html>
