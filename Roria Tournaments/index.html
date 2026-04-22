@@ -495,7 +495,67 @@
     font-size: 12px; font-weight: 800; color: #fff;
     border: 2px solid var(--red-dk);
   }
-  .pts { color: var(--blue); font-family: 'Press Start 2P', monospace; font-size: 12px; }
+
+  /* ══════════════════ SQUARE NEWS PREVIEW FIX ══════════════════ */
+  .np-featured {
+    background: var(--card);
+    border: 3px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    width: 260px; 
+    height: 260px; /* Forces a perfect square */
+    margin: 0 auto;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+    position: relative;
+  }
+  .np-featured::before { 
+    content: ''; position: absolute; top: 0; left: 0; right: 0; 
+    height: 5px; background: var(--red); z-index: 2;
+  }
+  .np-featured:hover { transform: translateY(-3px); box-shadow: 0 8px 0 rgba(0,0,0,0.12); }
+
+  .np-featured-icon {
+    background: linear-gradient(135deg, var(--red), var(--red-dk));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 64px;
+    height: 140px; /* Fixed height for top section */
+    flex-shrink: 0;
+  }
+  .np-featured-body {
+    padding: 16px 20px;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    text-align: center;
+    flex: 1; /* Takes remaining space */
+    background: #fff;
+  }
+  .np-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px; /* Increased for better readability */
+    line-height: 1.6;
+    color: var(--text);
+    margin: 0;
+    
+    /* Truncate text block if it's super long */
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Allows up to 3 lines */
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .np-read-more {
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--red);
+    margin-top: 8px;
+    text-transform: uppercase;
+  }
 
   /* ══════════════════ MODALS ══════════════════ */
   .modal-bg {
@@ -638,50 +698,6 @@
     line-height: 2;
   }
   footer span { color: var(--yellow); }
-
-  /* ── News Preview Section ── */
-  .np-featured {
-    background: var(--card);
-    border: 3px solid var(--border);
-    border-radius: 14px;
-    box-shadow: var(--shadow);
-    display: grid;
-    grid-template-columns: 120px 1fr;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform .15s, box-shadow .15s;
-    position: relative;
-  }
-  .np-featured::before { content:''; position:absolute; top:0; left:0; right:0; height:5px; background:var(--red); }
-  .np-featured:hover { transform: translateY(-3px); box-shadow: 0 8px 0 rgba(0,0,0,0.12); }
-
-  .np-featured-icon {
-    background: linear-gradient(135deg, var(--red), var(--red-dk));
-    display: flex; align-items: center; justify-content: center;
-    font-size: 52px;
-  }
-  .np-featured-body {
-    padding: 20px;
-    display: flex; flex-direction: column; gap: 8px;
-  }
-
-  .np-meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-  .np-date { font-size:11px; font-weight:700; color:var(--muted); }
-  .np-tag-announcement { background:#ffe5e5; border:2px solid #f4a0a0; color:var(--red); padding:2px 8px; border-radius:20px; font-size:10px; font-weight:800; text-transform:uppercase;}
-
-  .np-title {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 11px;
-    line-height: 1.7;
-    color: var(--text);
-  }
-  .np-excerpt { font-size:13px; color:var(--muted); line-height:1.6; flex:1; }
-  .np-read-more { font-size:12px; font-weight:800; color:var(--red); margin-top:2px; display:inline-block; }
-
-  @media (max-width:600px) {
-    .np-featured { grid-template-columns: 80px 1fr; }
-    .np-featured-icon { font-size:36px; }
-  }
 </style>
 </head>
 <body>
@@ -797,7 +813,7 @@
   </div>
 
   <div style="text-align:center; margin-top:28px;">
-    <button class="btn-poke btn-outline" onclick="location.href='news.html'">📰 See Full Rules & News</button>
+    <button class="btn-poke btn-outline" onclick="location.href='news.html'">📰 See News</button>
   </div>
 </div>
 
@@ -1165,16 +1181,11 @@ async function fetchLatestNews() {
     }
 
     container.innerHTML = `
-      <div class="np-featured" onclick="location.href='news.html'">
+      <div class="np-featured" onclick="location.href='article.html?id=${article.id}'">
         <div class="np-featured-icon">🌪️</div>
         <div class="np-featured-body">
-          <div class="np-meta">
-            <span class="tag np-tag-announcement">${article.category || 'Announcement'}</span>
-            <span class="np-date">${new Date(article.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-          </div>
-          <h3 class="np-title" style="font-size: 14px;">${article.title}</h3>
-          <div class="np-excerpt" style="font-size: 13px; margin-top: 8px; max-height: 40px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${article.excerpt}</div>
-          <span class="np-read-more" style="margin-top: 12px; display: inline-block;">Read Full Details →</span>
+          <h3 class="np-title">${article.title}</h3>
+          <span class="np-read-more">Read More →</span>
         </div>
       </div>
     `;
@@ -1207,8 +1218,9 @@ async function loadLeaderboard() {
       : `<div class="lb-av">${(trainer.username || 'T')[0].toUpperCase()}</div>`;
 
     const isMe = currentUser && trainer.id === currentUser.id;
-    const rowClick = isMe ? `onclick="window.location.href='account.html'"` : `onclick="window.location.href='user.html?id=${trainer.id}'"`;
-    const rowStyle = isMe ? 'style="background: #fffaf5; cursor:pointer;"' : 'style="cursor:pointer;"';
+    // Updated rowClick and rowStyle to disable clicking for self
+    const rowClick = isMe ? '' : `onclick="window.location.href='user.html?id=${trainer.id}'"`;
+    const rowStyle = isMe ? 'style="background: #fffaf5; cursor:default;"' : 'style="cursor:pointer;"';
 
     lbBody.innerHTML += `
       <tr ${rowClick} ${rowStyle}>
@@ -1230,14 +1242,17 @@ async function loadStats() {
   const totalVal = document.getElementById('stat-total');
   const liveVal = document.getElementById('stat-live');
 
-  const { count: pCount } = await sb.from('profiles').select('*', { count: 'exact', head: true });
-  if (playerVal) playerVal.textContent = pCount || 0;
+  // Use standard select if count: exact is blocked by RLS
+  const { data: pData } = await sb.from('profiles').select('id');
+  if (playerVal) playerVal.textContent = pData ? pData.length : 0;
 
-  const { count: tCount } = await sb.from('tournaments').select('*', { count: 'exact', head: true });
-  if (totalVal) totalVal.textContent = tCount || 0;
+  const { data: tData } = await sb.from('tournaments').select('id, status');
+  if (totalVal) totalVal.textContent = tData ? tData.length : 0;
   
-  const { count: lCount } = await sb.from('tournaments').select('*', { count: 'exact', head: true }).eq('status', 'live');
-  if (liveVal) liveVal.textContent = lCount || 0;
+  if (liveVal) {
+    const liveCount = tData ? tData.filter(t => t.status === 'live').length : 0;
+    liveVal.textContent = liveCount;
+  }
 }
 
 /* ─── TOURNAMENTS ─── */
