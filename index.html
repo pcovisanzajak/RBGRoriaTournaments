@@ -934,6 +934,47 @@ let currentUser = null;
 let profile = null;
 
 window.addEventListener('DOMContentLoaded', async () => {
+  const hash = window.location.hash;
+
+  // 1. Check if there is an error in the URL (like the expired link in your screenshot)
+  if (hash && hash.includes('error_description')) {
+    const params = new URLSearchParams(hash.replace('#', '?'));
+    const errorMsg = params.get('error_description').replace(/\+/g, ' ');
+    alert("❌ Reset Link Error: " + errorMsg + ". Please request a new link.");
+    window.location.hash = ""; // Clear the error from the URL
+    return;
+  }
+
+  // 2. Check if the user is arriving from a VALID recovery email
+  if (hash && hash.includes('type=recovery')) {
+    // Small delay to ensure the page is ready
+    setTimeout(async () => {
+      const newPassword = prompt("🛡️ Trainer, enter your new secure password (min 8 characters):");
+      
+      if (newPassword) {
+        if (newPassword.length < 8) {
+          alert("❌ Password is too short! Must be at least 8 characters.");
+          location.reload(); // Restart the process
+          return;
+        }
+
+        const { error } = await sb.auth.updateUser({ password: newPassword });
+        
+        if (error) {
+          alert("❌ Error: " + error.message);
+        } else {
+          alert("✅ Success! Your password has been updated. You can now log in.");
+          window.location.hash = ""; // Clean the URL
+          location.reload();
+        }
+      }
+    }, 500);
+  }
+
+  // ... rest of your existing DOMContentLoaded code (session checks, etc.)
+});
+
+window.addEventListener('DOMContentLoaded', async () => {
   const { data: { session } } = await sb.auth.getSession();
   if (session) {
     await loadProfile(session.user);
@@ -1369,25 +1410,25 @@ async function loadTournaments() {
   if (liveSection) liveSection.style.display = hasLive ? 'block' : 'none';
   if (upcomingSection) upcomingSection.style.display = hasUpcoming ? 'block' : 'none';
   if (pastSection) pastSection.style.display = hasPast ? 'block' : 'none';
-  // Automatically catch the recovery link and let user change password
-window.addEventListener('DOMContentLoaded', async () => {
-  // Check if the URL contains the recovery type
-  const hash = window.location.hash;
-  if (hash && hash.includes('type=recovery')) {
-    // Show a prompt or open a specific modal to change password
-    const newPassword = prompt("Enter your new password:");
-    if (newPassword) {
-      const { error } = await sb.auth.updateUser({ password: newPassword });
-      if (error) {
-        alert("Error updating password: " + error.message);
-      } else {
-        alert("Password updated successfully! You can now log in.");
-        // Clear the hash from the URL
-        window.location.hash = '';
-      }
-    }
+  async function handleForgotPassword() {
+  clearErrors('ff');
+  const email = v('fp-email');
+  if (!email) { setErr('ff-email'); return; }
+
+  setBtnLoading('fp-btn', true);
+
+  // Explicitly tell Supabase to send them back to your Vercel home page
+  const { data, error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://roria-tournaments.vercel.app/index.html', 
+  });
+
+  if (error) {
+    showStatus('fp-status', 'err', error.message);
+  } else {
+    showStatus('fp-status', 'ok', 'Check your email for the reset link!');
   }
-});
+  setBtnLoading('fp-btn', false);
+}
 }
 </script>
 </body>
