@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Article – RBG Roria Tournaments</title>
+<link rel="icon" type="image/svg+xml" href="Gemini_Generated_Image_9l05hr9l05hr9l05__1_-removebg-preview.png" viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23e3350d' stroke='%232a2a2a' stroke-width='4'/%3E%3Crect x='2' y='46' width='96' height='8' fill='%232a2a2a'/%3E%3Ccircle cx='50' cy='74' r='48' fill='%23f8f8f8' stroke='none'/%3E%3Ccircle cx='50' cy='50' r='16' fill='%23f8f8f8' stroke='%232a2a2a' stroke-width='4'/%3E%3Ccircle cx='50' cy='50' r='8' fill='%232a2a2a'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red:     #e3350d;
+    --red-dk:  #b02a0a;
+    --yellow:  #f7c948;
+    --blue:    #2c6fad;
+    --off:     #ece8df;
+    --card:    #ffffff;
+    --border:  #c8c0b0;
+    --text:    #2a2a2a;
+    --muted:   #7a7265;
+    --nav-h:   60px;
+    --shadow:  0 4px 0 rgba(0,0,0,0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--off);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: radial-gradient(circle, rgba(0,0,0,0.06) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ══════ NAV ══════ */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: var(--nav-h);
+    background: var(--red);
+    border-bottom: 4px solid var(--red-dk);
+    display: flex; align-items: center;
+    padding: 0 20px; gap: 16px;
+    z-index: 200;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+  .hamburger {
+    width: 40px; height: 40px;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center; gap: 5px;
+    cursor: pointer; border-radius: 8px;
+    border: 2px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+    transition: background .2s; flex-shrink: 0;
+  }
+  .hamburger:hover { background: rgba(255,255,255,0.2); }
+  .hamburger span {
+    display: block; width: 18px; height: 2px;
+    background: #fff; border-radius: 2px;
+    transition: transform .3s, opacity .3s; transform-origin: center;
+  }
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .nav-logo {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center;
+    line-height: 1; pointer-events: none; user-select: none;
+  }
+  .nav-logo .top-line {
+    font-family: 'Press Start 2P', monospace; font-size: 9px;
+    color: var(--yellow); letter-spacing: 3px;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+  }
+  .nav-logo .bottom-line {
+    font-family: 'Press Start 2P', monospace; font-size: 13px;
+    color: #fff; letter-spacing: 1px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+  }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+  /* ══════ DRAWER ══════ */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 300; opacity: 0; pointer-events: none;
+    transition: opacity .3s;
+  }
+  .overlay.open { opacity: 1; pointer-events: all; }
+  .drawer {
+    position: fixed; top: 0; left: 0;
+    width: 280px; height: 100%;
+    background: #fff; border-right: 4px solid var(--border);
+    z-index: 400; transform: translateX(-100%);
+    transition: transform .32s cubic-bezier(.4,0,.2,1);
+    display: flex; flex-direction: column;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header {
+    background: var(--red); border-bottom: 4px solid var(--red-dk);
+    padding: 18px 20px;
+    display: flex; flex-direction: column; align-items: flex-start;
+  }
+  .drawer-header .site-tag {
+    font-family: 'Press Start 2P', monospace; font-size: 7px;
+    color: var(--yellow); letter-spacing: 2px; margin-bottom: 4px;
+  }
+  .drawer-header .site-name {
+    font-family: 'Press Start 2P', monospace; font-size: 11px;
+    color: #fff; line-height: 1.6;
+  }
+  .drawer-section {
+    padding: 14px 20px 6px; font-size: 10px; font-weight: 800;
+    letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
+  }
+  .drawer-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 13px 20px; cursor: pointer;
+    border-left: 4px solid transparent;
+    transition: all .15s; font-size: 15px; font-weight: 700;
+    color: var(--text); text-decoration: none;
+  }
+  .drawer-item:hover, .drawer-item.active {
+    background: var(--off); border-left-color: var(--red); color: var(--red);
+  }
+  .drawer-item .di-icon { font-size: 20px; width: 26px; text-align: center; }
+  .drawer-divider { height: 1px; background: var(--border); margin: 8px 20px; }
+
+  /* ══════ ARTICLE LAYOUT ══════ */
+  .page { position: relative; z-index: 1; }
+
+  .article-hero {
+    margin-top: var(--nav-h);
+    min-height: 220px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 90px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--red) 0%, var(--red-dk) 100%);
+  }
+  .article-hero::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 20% 80%, rgba(247,201,72,0.18), transparent 60%);
+  }
+
+  .article-container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+  }
+
+  /* Meta bar */
+  .article-meta-bar {
+    background: var(--card);
+    border: 3px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 14px 14px;
+    padding: 20px 24px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    box-shadow: var(--shadow);
+    margin-bottom: 28px;
+    opacity: 0; animation: fadeUp .4s .1s forwards;
+  }
+
+  .news-tag {
+    padding: 4px 12px; border-radius: 20px;
+    font-size: 11px; font-weight: 800; letter-spacing: .5px;
+    border: 2px solid transparent;
+  }
+  .news-tag-announcement { background: #ffe5e5; border-color: #f4a0a0; color: var(--red); }
+  .news-tag-tournament   { background: #fff8e0; border-color: #f0d060; color: #a07800; }
+  .news-tag-update       { background: #e0eeff; border-color: #90b8f0; color: var(--blue); }
+  .news-tag-community    { background: #e0ffe5; border-color: #80d090; color: #256030; }
+
+  .article-date {
+    font-size: 13px; font-weight: 700; color: var(--muted);
+  }
+
+  /* Title */
+  .article-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(13px, 2.5vw, 18px);
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 24px;
+    opacity: 0; animation: fadeUp .4s .2s forwards;
+  }
+
+  /* Body content */
+  .article-body {
+    background: var(--card);
+    border: 3px solid var(--border);
+    border-radius: 14px;
+    padding: 32px;
+    box-shadow: var(--shadow);
+    font-size: 15px;
+    line-height: 1.85;
+    color: var(--text);
+    margin-bottom: 28px;
+    opacity: 0; animation: fadeUp .4s .3s forwards;
+    position: relative;
+    overflow: hidden;
+  }
+  .article-body::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: var(--red);
+  }
+
+  /* Styles for content written inside article body */
+  .article-body h2 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px; line-height: 1.7;
+    color: var(--text); margin: 28px 0 14px;
+  }
+  .article-body h2:first-child { margin-top: 0; }
+  .article-body p { margin-bottom: 16px; }
+  .article-body p:last-child { margin-bottom: 0; }
+  .article-body ul, .article-body ol {
+    margin: 0 0 16px 20px;
+  }
+  .article-body li { margin-bottom: 8px; }
+  .article-body strong { font-weight: 800; }
+  .article-body .highlight {
+    background: #fff8e0; border-left: 4px solid var(--yellow);
+    padding: 14px 18px; border-radius: 0 8px 8px 0;
+    margin: 20px 0; font-weight: 700;
+  }
+
+  /* Back button */
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 22px; border-radius: 10px;
+    font-family: 'Nunito', sans-serif; font-weight: 800;
+    font-size: 14px; cursor: pointer;
+    border: 3px solid var(--border);
+    background: var(--card); color: var(--text);
+    box-shadow: 0 4px 0 var(--border);
+    text-decoration: none;
+    transition: all .15s;
+    opacity: 0; animation: fadeUp .4s .4s forwards;
+  }
+  .back-btn:hover {
+    transform: translateY(2px); box-shadow: 0 2px 0 var(--border);
+    border-color: var(--red); color: var(--red);
+  }
+
+  /* Not found state */
+  .not-found {
+    text-align: center; padding: 80px 20px;
+  }
+  .not-found .nf-icon { font-size: 60px; margin-bottom: 20px; }
+  .not-found h2 {
+    font-family: 'Press Start 2P', monospace; font-size: 14px;
+    line-height: 1.6; color: var(--text); margin-bottom: 12px;
+  }
+  .not-found p { font-size: 15px; color: var(--muted); font-weight: 600; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  footer {
+    background: var(--text); color: rgba(255,255,255,0.5);
+    text-align: center; padding: 24px;
+    font-size: 11px; font-family: 'Press Start 2P', monospace;
+    letter-spacing: 1px; position: relative; z-index: 1;
+  }
+  footer span { color: var(--red); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="hamburger" id="hamburger" onclick="toggleDrawer()">
+    <span></span><span></span><span></span>
+  </div>
+  <div class="nav-logo">
+    <span class="top-line">RBG</span>
+    <span class="bottom-line">RORIA TOURNAMENTS</span>
+  </div>
+  <div class="nav-right"></div>
+</nav>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+
+<!-- DRAWER -->
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="site-tag">RBG</div>
+    <div class="site-name">RORIA<br>TOURNAMENTS</div>
+  </div>
+  <div class="drawer-section">Menu</div>
+  <a class="drawer-item" href="index.html" onclick="closeDrawer()"><span class="di-icon">🏠</span> Home</a>
+  <a class="drawer-item" href="index.html#leaderboard" onclick="closeDrawer()"><span class="di-icon">🏆</span> Leaderboard</a>
+  <a class="drawer-item" href="index.html#live" onclick="closeDrawer()"><span class="di-icon">⚡</span> Live Tournaments</a>
+  <a class="drawer-item" href="index.html#past" onclick="closeDrawer()"><span class="di-icon">📁</span> Past Tournaments</a>
+  <div class="drawer-divider"></div>
+  <div class="drawer-section">Info</div>
+  <a class="drawer-item active" href="news.html" onclick="closeDrawer()"><span class="di-icon">📰</span> News</a>
+  <a class="drawer-item" href="about.html" onclick="closeDrawer()"><span class="di-icon">👥</span> About Us</a>
+  <div id="drawerUserSection"></div>
+</div>
+
+<!-- PAGE -->
+<div class="page" id="pageContent"></div>
+
+<footer>
+  <span>RBG</span> RORIA TOURNAMENTS &nbsp;·&nbsp; © 2026 &nbsp;·&nbsp; ALL RIGHTS RESERVED
+</footer>
+
+<script>
+  /* ══════════════════════════════════════════
+     ARTICLES DATABASE
+     To add a new article, just add a new
+     object to this array. That's it.
+  ══════════════════════════════════════════ */
+  const ARTICLES = [
+    {
+      id: 1,
+      category: 'announcement',
+      categoryLabel: 'Announcement',
+      date: 'June 2026',
+      emoji: '🏆',
+      heroBg: 'linear-gradient(135deg, #e3350d 0%, #b02a0a 100%)',
+      title: "Season 3 of RBG Roria Tournaments is now open!",
+      body: `
+        <p>We're thrilled to announce that <strong>Season 3</strong> is officially here. Registration is open and brackets are filling up fast — don't wait too long to secure your spot.</p>
+
+        <h2>What's New This Season</h2>
+        <p>Season 3 brings the biggest changes yet to the RBG Roria competitive format:</p>
+        <ul>
+          <li><strong>Expanded brackets</strong> — up to 64 trainers per tournament</li>
+          <li><strong>New Legendary clause</strong> — see the updated rulebook for details</li>
+          <li><strong>Prize pool</strong> — top 3 finishers earn exclusive in-game rewards</li>
+          <li><strong>Double-elimination option</strong> — selected events will offer a second-chance bracket</li>
+        </ul>
+
+        <div class="highlight">
+          📅 Registration closes 7 days before each event. Sign up early to guarantee your place.
+        </div>
+
+        <h2>How to Register</h2>
+        <p>Create an account on this site, then head to any upcoming tournament and hit the <strong>Join</strong> button. Our referees will confirm your entry within 24 hours.</p>
+
+        <p>Good luck to all trainers — may the best team win!</p>
+      `
+    },
+    {
+      id: 2,
+      category: 'tournament',
+      categoryLabel: 'Tournament',
+      date: 'May 2026',
+      emoji: '⚡',
+      heroBg: 'linear-gradient(135deg, #2c6fad 0%, #1a4a7a 100%)',
+      title: "Spring Invitational Results",
+      body: `
+        <p>The Spring Invitational is over and what a tournament it was. 32 trainers competed across two weeks of intense battles.</p>
+
+        <h2>Final Standings</h2>
+        <ul>
+          <li>🥇 <strong>1st Place</strong> — RedBallGuy</li>
+          <li>🥈 <strong>2nd Place</strong> — ArcaneRef</li>
+          <li>🥉 <strong>3rd Place</strong> — StatsBot</li>
+        </ul>
+
+        <div class="highlight">
+          🎬 Match replays are now available — check the tournament page for full bracket results and VODs.
+        </div>
+
+        <h2>Highlights</h2>
+        <p>The semi-final between RedBallGuy and CastAway lasted nearly 45 minutes and came down to a last-Pokemon clutch that nobody saw coming. The crowd in Discord was going wild.</p>
+
+        <p>Congratulations to all 32 trainers who competed. Season 3 qualifiers begin next month — stay tuned!</p>
+      `
+    },
+    {
+      id: 3,
+      category: 'update',
+      categoryLabel: 'Update',
+      date: 'May 2026',
+      emoji: '⚙️',
+      heroBg: 'linear-gradient(135deg, #3a9a4a 0%, #1e6630 100%)',
+      title: "Rulebook v2.4 Released",
+      body: `
+        <p>The official RBG Roria Tournament rulebook has been updated to <strong>version 2.4</strong>. All active and upcoming tournaments will adopt these rules starting next cycle.</p>
+
+        <h2>Key Changes</h2>
+        <ul>
+          <li><strong>Legendary Clause</strong> — Only one Legendary Pokémon is permitted per team</li>
+          <li><strong>Species Clause clarification</strong> — Regional forms count as separate species</li>
+          <li><strong>Time limit</strong> — Matches now have a 30-minute cap; if time expires, winner is decided by remaining HP percentage</li>
+          <li><strong>Disconnect rule</strong> — A disconnect within the first 3 turns will result in a rematch</li>
+        </ul>
+
+        <div class="highlight">
+          📖 Always read the full rulebook before registering for a tournament. Ignorance of the rules is not a valid appeal.
+        </div>
+
+        <p>If you have questions about any of the changes, post in the #rules-questions channel on Discord and a referee will respond within 24 hours.</p>
+      `
+    },
+    {
+      id: 4,
+      category: 'community',
+      categoryLabel: 'Community',
+      date: 'April 2026',
+      emoji: '⭐',
+      heroBg: 'linear-gradient(135deg, #c89010 0%, #a07000 100%)',
+      title: "Trainer Spotlight: April Edition",
+      body: `
+        <p>Every month we shine a light on trainers who have made an impression — whether through climbing the leaderboard, creative teambuilding, or supporting the community.</p>
+
+        <h2>This Month's Spotlight</h2>
+        <p><strong>CastAway</strong> — Started Season 2 unranked and finished in the top 10, going on a 12-match win streak at one point. Their signature stall team with a Toxic-Protect core caught opponents completely off guard.</p>
+
+        <p><strong>NewTrainer99</strong> — A first-timer who made it all the way to the quarter-finals in their debut tournament. Showed incredible composure in a tense match against a veteran.</p>
+
+        <div class="highlight">
+          ⭐ Want to nominate a trainer for next month's spotlight? Post in #community on Discord!
+        </div>
+
+        <h2>Community Achievements</h2>
+        <ul>
+          <li>We hit <strong>200 registered trainers</strong> this month 🎉</li>
+          <li>Over <strong>1,000 battles</strong> recorded on the tracker</li>
+          <li>New personal-best for concurrent Discord members during the Invitational final</li>
+        </ul>
+
+        <p>Thanks for making this community what it is. See you in the bracket!</p>
+      `
+    },
+    {
+      id: 5,
+      category: 'announcement',
+      categoryLabel: 'Announcement',
+      date: 'April 2026',
+      emoji: '📢',
+      heroBg: 'linear-gradient(135deg, #7a3a9a 0%, #501870 100%)',
+      title: "New Format: Double Elimination",
+      body: `
+        <p>Starting with the Summer Cup, selected tournaments will run on a <strong>double-elimination</strong> bracket. This means losing once doesn't knock you out — you drop into a losers' bracket and still have a path to the title.</p>
+
+        <h2>How Double Elimination Works</h2>
+        <ul>
+          <li>All trainers start in the <strong>Winners Bracket</strong></li>
+          <li>Your first loss drops you to the <strong>Losers Bracket</strong></li>
+          <li>A second loss eliminates you from the tournament</li>
+          <li>The Losers Bracket winner faces the Winners Bracket winner in the <strong>Grand Final</strong></li>
+          <li>If the Losers Bracket winner wins the Grand Final, a second Grand Final is played (bracket reset)</li>
+        </ul>
+
+        <div class="highlight">
+          ℹ️ Not every tournament will use this format. Check each event's page to see which bracket type it uses.
+        </div>
+
+        <p>We're trialling this format based on community feedback. Let us know what you think in Discord after the Summer Cup!</p>
+      `
+    },
+    {
+      id: 6,
+      category: 'tournament',
+      categoryLabel: 'Tournament',
+      date: 'March 2026',
+      emoji: '🎮',
+      heroBg: 'linear-gradient(135deg, #2c6fad 0%, #1a4a7a 100%)',
+      title: "Winter Championship Recap",
+      body: `
+        <p>The Winter Championship has concluded after three exciting weeks of competition. Here's everything that happened.</p>
+
+        <h2>Final Standings</h2>
+        <ul>
+          <li>🥇 <strong>1st</strong> — ArcaneRef (12W – 0L)</li>
+          <li>🥈 <strong>2nd</strong> — RedBallGuy (11W – 1L)</li>
+          <li>🥉 <strong>3rd</strong> — CastAway (10W – 2L)</li>
+        </ul>
+
+        <h2>Match of the Tournament</h2>
+        <p>The semi-final clash between ArcaneRef and RedBallGuy is already being called one of the best matches in RBG history. An incredible 6v1 comeback in the final game had everyone in the Discord VC speechless.</p>
+
+        <div class="highlight">
+          🎬 All matches were recorded. Full replays are linked on the tournament page.
+        </div>
+
+        <p>Congratulations to everyone who competed. The Spring Invitational is just around the corner — registration opens next week!</p>
+      `
+    },
+  ];
+
+  /* ══════════════════════════════════════════
+     TAG CLASS HELPER
+  ══════════════════════════════════════════ */
+  function tagClass(cat) {
+    return {
+      announcement: 'news-tag-announcement',
+      tournament:   'news-tag-tournament',
+      update:       'news-tag-update',
+      community:    'news-tag-community',
+    }[cat] || 'news-tag-announcement';
+  }
+
+  /* ══════════════════════════════════════════
+     LOAD ARTICLE
+  ══════════════════════════════════════════ */
+  function loadArticle() {
+    const params = new URLSearchParams(window.location.search);
+    const id = parseInt(params.get('id'));
+    const article = ARTICLES.find(a => a.id === id);
+    const container = document.getElementById('pageContent');
+
+    if (!article) {
+      container.innerHTML = `
+        <div class="article-container">
+          <div class="not-found">
+            <div class="nf-icon">😕</div>
+            <h2>Article Not Found</h2>
+            <p>That article doesn't exist or may have been removed.</p>
+            <br><br>
+            <a class="back-btn" href="news.html">← Back to News</a>
+          </div>
+        </div>`;
+      return;
+    }
+
+    // Update page title
+    document.title = article.title + ' – RBG Roria Tournaments';
+
+    container.innerHTML = `
+      <div class="article-hero" style="background: ${article.heroBg};">
+        ${article.emoji}
+      </div>
+
+      <div class="article-container">
+        <div class="article-meta-bar">
+          <span class="news-tag ${tagClass(article.category)}">${article.categoryLabel}</span>
+          <span class="article-date">📅 ${article.date}</span>
+        </div>
+
+        <h1 class="article-title">${article.title}</h1>
+
+        <div class="article-body">
+          ${article.body}
+        </div>
+
+        <a class="back-btn" href="news.html">← Back to News</a>
+      </div>
+    `;
+  }
+
+  loadArticle();
+
+  /* ══════ DRAWER ══════ */
+  function toggleDrawer() {
+    const open = document.getElementById('drawer').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('open', open);
+    document.getElementById('hamburger').classList.toggle('open', open);
+  }
+  function closeDrawer() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('overlay').classList.remove('open');
+    document.getElementById('hamburger').classList.remove('open');
+  }
+</script>
+</body>
+</html>

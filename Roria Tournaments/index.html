@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RBG Roria Tournaments</title>
+<link rel="icon" type="image/svg+xml" href="Gemini_Generated_Image_9l05hr9l05hr9l05__1_-removebg-preview.png" viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23e3350d' stroke='%232a2a2a' stroke-width='4'/%3E%3Crect x='2' y='46' width='96' height='8' fill='%232a2a2a'/%3E%3Ccircle cx='50' cy='74' r='48' fill='%23f8f8f8' stroke='none'/%3E%3Ccircle cx='50' cy='50' r='16' fill='%23f8f8f8' stroke='%232a2a2a' stroke-width='4'/%3E%3Ccircle cx='50' cy='50' r='8' fill='%232a2a2a'/%3E%3C/svg%3E">
+
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -93,6 +95,7 @@
     line-height: 1;
     pointer-events: none;
     user-select: none;
+    cursor: pointer;
   }
   .nav-logo .top-line {
     font-family: 'Press Start 2P', monospace;
@@ -483,7 +486,8 @@
   .rank-1 { color: #f0a000; }
   .rank-2 { color: #8090a0; }
   .rank-3 { color: #b06020; }
-  .lb-user { display: flex; align-items: center; gap: 10px; }
+  .lb-user { display: flex; align-items: center; gap: 12px; }
+  .lb-user img { display: block; flex-shrink: 0; }
   .lb-av {
     width: 30px; height: 30px; border-radius: 50%;
     background: var(--red);
@@ -635,32 +639,59 @@
   }
   footer span { color: var(--yellow); }
 
-  .lb-user {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+  /* ── News Preview Section ── */
+  .np-featured {
+    background: var(--card);
+    border: 3px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+    position: relative;
+  }
+  .np-featured::before { content:''; position:absolute; top:0; left:0; right:0; height:5px; background:var(--red); }
+  .np-featured:hover { transform: translateY(-3px); box-shadow: 0 8px 0 rgba(0,0,0,0.12); }
 
-.lb-user img {
-  display: block;
-  flex-shrink: 0;
-}
+  .np-featured-icon {
+    background: linear-gradient(135deg, var(--red), var(--red-dk));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 52px;
+  }
+  .np-featured-body {
+    padding: 20px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
 
-.rank {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 14px;
-}
+  .np-meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .np-date { font-size:11px; font-weight:700; color:var(--muted); }
+  .np-tag-announcement { background:#ffe5e5; border:2px solid #f4a0a0; color:var(--red); padding:2px 8px; border-radius:20px; font-size:10px; font-weight:800; text-transform:uppercase;}
+
+  .np-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+  .np-excerpt { font-size:13px; color:var(--muted); line-height:1.6; flex:1; }
+  .np-read-more { font-size:12px; font-weight:800; color:var(--red); margin-top:2px; display:inline-block; }
+
+  @media (max-width:600px) {
+    .np-featured { grid-template-columns: 80px 1fr; }
+    .np-featured-icon { font-size:36px; }
+  }
 </style>
 </head>
 <body>
 
-<!-- ════════════ NAV ════════════ -->
 <nav>
   <div class="hamburger" id="hamburger" onclick="toggleDrawer()">
     <span></span><span></span><span></span>
   </div>
 
-  <div class="nav-logo">
+  <div class="nav-logo" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
     <span class="top-line">RBG</span>
     <span class="bottom-line">RORIA TOURNAMENTS</span>
   </div>
@@ -671,10 +702,8 @@
   </div>
 </nav>
 
-<!-- ════════════ OVERLAY ════════════ -->
 <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
 
-<!-- ════════════ DRAWER ════════════ -->
 <div class="drawer" id="drawer">
   <div class="drawer-header">
     <div class="site-tag">RBG</div>
@@ -682,31 +711,31 @@
   </div>
 
   <div class="drawer-section">Menu</div>
-  <a class="drawer-item" onclick="closeDrawer()"><span class="di-icon">🏠</span> Home</a>
-  <a class="drawer-item" onclick="closeDrawer()"><span class="di-icon">🏆</span> Leaderboard</a>
-  <a class="drawer-item" onclick="closeDrawer()"><span class="di-icon">⚡</span> Live Tournaments</a>
-  <a class="drawer-item" onclick="closeDrawer()"><span class="di-icon">📁</span> Past Tournaments</a>
+  <a class="drawer-item" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); closeDrawer()"><span class="di-icon">🏠</span> Home</a>
+  <a class="drawer-item" onclick="document.querySelector('.lb-card').scrollIntoView({behavior:'smooth'}); closeDrawer()"><span class="di-icon">🏆</span> Leaderboard</a>
+  <a class="drawer-item" onclick="document.getElementById('tournaments-sec-live').scrollIntoView({behavior:'smooth'}); closeDrawer()"><span class="di-icon">⚡</span> Live Tournaments</a>
+  <a class="drawer-item" onclick="document.getElementById('tournaments-sec-past').scrollIntoView({behavior:'smooth'}); closeDrawer()"><span class="di-icon">📁</span> Past Tournaments</a>
 
   <div class="drawer-divider"></div>
 
   <div class="drawer-section">Info</div>
-  <a class="drawer-item" onclick="closeDrawer()"><span class="di-icon">📰</span> News</a>
-  <a class="drawer-item" onclick="closeDrawer()"><span class="di-icon">👥</span> About Us</a>
+  <a class="drawer-item" onclick="document.getElementById('news-preview-sec').scrollIntoView({behavior:'smooth'}); closeDrawer()"><span class="di-icon">📰</span> News</a>
+  <a class="drawer-item" href="about.html"><span class="di-icon">👥</span> About Us</a>
 
-  <!-- populated when logged in -->
   <div id="drawerUserSection"></div>
 </div>
 
-<!-- ════════════ HERO ════════════ -->
 <div class="hero">
   <div class="pokeball-deco"></div>
   <p class="hero-eyebrow">Official Tracker</p>
   <h1 class="hero-title"><span class="rbg">RBG</span> Roria<br>Tournaments</h1>
   <p class="hero-sub">Track every match, every trainer, every champion — all in one place.</p>
-  <div class="hero-cta">
+  
+  <div class="hero-cta" id="hero-cta-container">
     <button class="btn-poke btn-red" onclick="openModal('signup')">Join Now</button>
-    <button class="btn-poke btn-outline" onclick="document.getElementById('tournaments-sec').scrollIntoView({behavior:'smooth'})">View Tournaments</button>
+    <button class="btn-poke btn-outline" onclick="scrollToTournaments()">View Tournaments</button>
   </div>
+
   <div class="stats-row">
     <div class="stat-box"><span class="stat-val" id="stat-players">—</span><span class="stat-label">Trainers</span></div>
     <div class="stat-box"><span class="stat-val" id="stat-total">—</span><span class="stat-label">Tournaments</span></div>
@@ -714,7 +743,7 @@
   </div>
 </div>
 
-<!-- ════════════ TOURNAMENTS ════════════ -->
+
 <div class="container" id="tournaments-sec-live" style="display:none;">
     <div class="sec-head">
         <p class="sec-eyebrow">// Right Now</p>
@@ -731,8 +760,7 @@
     <div class="card-grid" id="upcoming-cards"></div>
 </div>
 
-  <!-- LEADERBOARD -->
-  <div class="container">
+<div class="container">
   <div class="sec-head">
     <p class="sec-eyebrow">// Top Trainers</p>
     <h2 class="sec-title">Leaderboard</h2>
@@ -743,11 +771,12 @@
   <tr>
     <th>#</th>
     <th>Trainer</th>
-    <th>W / L / D</th> </tr>
+    <th>W / L / D</th> 
+  </tr>
 </thead>
       <tbody id="lb-body">
         <tr>
-          <td colspan="4" style="text-align:center; padding:40px; color:var(--muted);">
+          <td colspan="3" style="text-align:center; padding:40px; color:var(--muted);">
             Loading rankings...
           </td>
         </tr>
@@ -756,21 +785,34 @@
   </div>
 </div>
 
-  <!-- PAST TOURNAMENTS -->
- <div class="container" id="tournaments-sec-past" style="display:none; margin-top: 40px;">
+<div class="container" id="news-preview-sec" style="margin-top: 40px;">
+  <span id="news" style="display:block;position:relative;top:-80px;visibility:hidden;"></span>
+  <div class="sec-head">
+    <p class="sec-eyebrow">// Latest Updates</p>
+    <h2 class="sec-title">News &amp; Announcements</h2>
+  </div>
+
+  <div id="home-news-container">
+      <div style="text-align:center; padding: 40px; color:var(--muted); font-weight:700;">Loading latest news...</div>
+  </div>
+
+  <div style="text-align:center; margin-top:28px;">
+    <button class="btn-poke btn-outline" onclick="location.href='news.html'">📰 See Full Rules & News</button>
+  </div>
+</div>
+
+<div class="container" id="tournaments-sec-past" style="display:none; margin-top: 40px;">
   <div class="sec-head">
     <p class="sec-eyebrow">// Archive</p>
     <h2 class="sec-title">Past Tournaments</h2>
   </div>
-  <div class="card-grid" id="past-cards">
-    </div>
+  <div class="card-grid" id="past-cards"></div>
 </div>
 
 <footer>
   <span>RBG</span> RORIA TOURNAMENTS &nbsp;·&nbsp; © 2026 &nbsp;·&nbsp; ALL RIGHTS RESERVED
 </footer>
 
-<!-- ════════════ SIGN UP MODAL ════════════ -->
 <div class="modal-bg" id="signupModal">
   <div class="modal">
     <div class="modal-x" onclick="closeModal('signup')">✕</div>
@@ -813,7 +855,6 @@
   </div>
 </div>
 
-<!-- ════════════ LOG IN MODAL ════════════ -->
 <div class="modal-bg" id="loginModal">
   <div class="modal">
     <div class="modal-x" onclick="closeModal('login')">✕</div>
@@ -840,7 +881,6 @@
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
@@ -855,19 +895,57 @@ let profile = null;
 
 window.addEventListener('DOMContentLoaded', async () => {
   const { data: { session } } = await sb.auth.getSession();
-  if (session) await loadProfile(session.user);
+  if (session) {
+    await loadProfile(session.user);
+  } else {
+    updateHeroButtons();
+  }
 
   sb.auth.onAuthStateChange(async (event, session) => {
-    if (session) { await loadProfile(session.user); }
-    else { currentUser = null; profile = null; renderNav(); }
+    if (session) { 
+        await loadProfile(session.user); 
+    } else { 
+        currentUser = null; 
+        profile = null; 
+        renderNav(); 
+        updateHeroButtons();
+    }
   });
 
-  // This must be here!
   loadTournaments(); 
-
   loadStats();
   loadLeaderboard(); 
+  fetchLatestNews(); // Fetch the dynamic news!
 });
+
+/* ─── DYNAMIC HERO BUTTONS ─── */
+function updateHeroButtons() {
+  const ctaContainer = document.getElementById('hero-cta-container');
+  if (!ctaContainer) return;
+
+  if (profile) {
+    ctaContainer.innerHTML = `
+      <button class="btn-poke btn-red" onclick="document.getElementById('news-preview-sec').scrollIntoView({behavior:'smooth'})">Latest News</button>
+      <button class="btn-poke btn-outline" onclick="scrollToTournaments()">View Tournaments</button>
+    `;
+  } else {
+    ctaContainer.innerHTML = `
+      <button class="btn-poke btn-red" onclick="openModal('signup')">Join Now</button>
+      <button class="btn-poke btn-outline" onclick="scrollToTournaments()">View Tournaments</button>
+    `;
+  }
+}
+
+/* ─── SMART SCROLL TO TOURNAMENTS ─── */
+function scrollToTournaments() {
+  const live = document.getElementById('tournaments-sec-live');
+  const upcoming = document.getElementById('tournaments-sec-upcoming');
+  const past = document.getElementById('tournaments-sec-past');
+  
+  if (live && live.style.display !== 'none') live.scrollIntoView({behavior: 'smooth'});
+  else if (upcoming && upcoming.style.display !== 'none') upcoming.scrollIntoView({behavior: 'smooth'});
+  else if (past && past.style.display !== 'none') past.scrollIntoView({behavior: 'smooth'});
+}
 
 /* ─── PROFILE ─── */
 async function loadProfile(user) {
@@ -876,8 +954,8 @@ async function loadProfile(user) {
   if (error) console.error("Profile Fetch Error:", error);
   profile = data;
   renderNav();
+  updateHeroButtons();
 }
-
 
 /* ─── NAV render ─── */
 function renderNav() {
@@ -888,21 +966,17 @@ function renderNav() {
   if (profile) {
     const init = (profile.username || 'T')[0].toUpperCase();
     
-    // 1. Create the Avatar HTML (Check if URL exists)
     const avHtml = (profile.avatar_url && profile.avatar_url.includes('http')) 
       ? `<img src="${profile.avatar_url}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border: 2px solid #fff;">`
       : `<div class="av">${init}</div>`;
 
-    // 2. Update Top Navigation
     nr.innerHTML = `
       <div class="user-chip" onclick="window.location.href='account.html'">
         ${avHtml}
         <span class="uname">${profile.username}</span>
       </div>`;
 
-    // 3. Update Sidebar Drawer
     if (ds) {
-      // Use a slightly larger version for the drawer
       const drawerAv = (profile.avatar_url && profile.avatar_url.includes('http')) 
         ? `<img src="${profile.avatar_url}" style="width:38px; height:38px; border-radius:50%; object-fit:cover; border: 3px solid var(--red-dk);">`
         : `<div class="drawer-av">${init}</div>`;
@@ -920,7 +994,6 @@ function renderNav() {
         </div>`;
     }
   } else {
-    // If logged out
     nr.innerHTML = `
       <button class="nav-btn nav-btn-ghost" onclick="openModal('login')">Log In</button>
       <button class="nav-btn nav-btn-solid" onclick="openModal('signup')">Sign Up</button>`;
@@ -947,7 +1020,6 @@ async function handleSignup() {
 
   setBtnLoading('su-btn', true);
 
-  // Create a pseudo-email if none provided
   const authEmail = email || `${username.toLowerCase().replace(/\s+/g,'_')}@rbg.roria.local`;
 
   const { data, error } = await sb.auth.signUp({
@@ -997,7 +1069,6 @@ async function handleLogin() {
 
   setBtnLoading('li-btn', true);
 
-  // 1. Find the email used for this username
   const { data: prof, error: fetchError } = await sb
     .from('profiles')
     .select('auth_email')
@@ -1010,7 +1081,6 @@ async function handleLogin() {
     return;
   }
 
-  // 2. Sign in with that email
   const { error: loginError } = await sb.auth.signInWithPassword({
     email: prof.auth_email,
     password: pass,
@@ -1032,7 +1102,7 @@ async function handleLogout() {
   await sb.auth.signOut();
   closeDrawer();
   toast('👋 Logged out');
-  location.reload(); // Refresh to clear private data
+  location.reload(); 
 }
 
 /* ─── HELPERS ─── */
@@ -1058,7 +1128,6 @@ function toast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-/* Drawer & Modal controls remain same as your previous code */
 function toggleDrawer() {
   const open = document.getElementById('drawer').classList.toggle('open');
   document.getElementById('overlay').classList.toggle('open', open);
@@ -1083,6 +1152,35 @@ function switchModal(from, to) {
   setTimeout(() => openModal(to), 220);
 }
 
+/* ─── DYNAMIC LATEST NEWS ─── */
+async function fetchLatestNews() {
+    const container = document.getElementById('home-news-container');
+    if(!container) return;
+
+    const { data: article, error } = await sb.from('news_articles').select('*').order('created_at', { ascending: false }).limit(1).single();
+
+    if (error || !article) {
+        container.innerHTML = `<div style="text-align:center; color:var(--muted); font-weight:700; padding: 20px;">No recent news available.</div>`;
+        return;
+    }
+
+    container.innerHTML = `
+      <div class="np-featured" onclick="location.href='news.html'">
+        <div class="np-featured-icon">🌪️</div>
+        <div class="np-featured-body">
+          <div class="np-meta">
+            <span class="tag np-tag-announcement">${article.category || 'Announcement'}</span>
+            <span class="np-date">${new Date(article.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+          </div>
+          <h3 class="np-title" style="font-size: 14px;">${article.title}</h3>
+          <div class="np-excerpt" style="font-size: 13px; margin-top: 8px; max-height: 40px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${article.excerpt}</div>
+          <span class="np-read-more" style="margin-top: 12px; display: inline-block;">Read Full Details →</span>
+        </div>
+      </div>
+    `;
+}
+
+/* ─── LEADERBOARD ─── */
 async function loadLeaderboard() {
   const lbBody = document.getElementById('lb-body');
   if (!lbBody) return;
@@ -1093,24 +1191,28 @@ async function loadLeaderboard() {
     .order('wins', { ascending: false })
     .limit(5);
 
-  if (error) return;
+  if (error || !trainers) return;
 
   lbBody.innerHTML = '';
   trainers.forEach((trainer, index) => {
+    const rank = index + 1;
+    let rankDisplay = rank;
+    if (rank === 1) rankDisplay = `<span class="rank rank-1">1</span>`;
+    else if (rank === 2) rankDisplay = `<span class="rank rank-2">2</span>`;
+    else if (rank === 3) rankDisplay = `<span class="rank rank-3">3</span>`;
+    else rankDisplay = `<span class="rank">${rank}</span>`;
+
     const avatarHtml = (trainer.avatar_url && trainer.avatar_url.includes('http'))
-      ? `<img src="${trainer.avatar_url}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; border:2px solid var(--red-dk);">`
-      : `<div class="lb-av">${trainer.username[0].toUpperCase()}</div>`;
+      ? `<img src="${trainer.avatar_url}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; border:2px solid var(--red-dk); display:block;">`
+      : `<div class="lb-av">${(trainer.username || 'T')[0].toUpperCase()}</div>`;
 
-    // 1. Check if this row belongs to the logged-in user
     const isMe = currentUser && trainer.id === currentUser.id;
-
-    // 2. Only add the onclick and pointer style if it's NOT you
-    const rowClick = isMe ? '' : `onclick="window.location.href='user.html?id=${trainer.id}'"`;
-    const rowStyle = isMe ? 'style="background: #fffaf5;"' : 'style="cursor:pointer;"';
+    const rowClick = isMe ? `onclick="window.location.href='account.html'"` : `onclick="window.location.href='user.html?id=${trainer.id}'"`;
+    const rowStyle = isMe ? 'style="background: #fffaf5; cursor:pointer;"' : 'style="cursor:pointer;"';
 
     lbBody.innerHTML += `
       <tr ${rowClick} ${rowStyle}>
-        <td><span class="rank">${index + 1}</span></td>
+        <td>${rankDisplay}</td>
         <td>
           <div class="lb-user">
             ${avatarHtml}
@@ -1122,63 +1224,23 @@ async function loadLeaderboard() {
   });
 }
 
-  // 2. Clear the "Loading..." row
-  lbBody.innerHTML = '';
-
-  // 3. Loop through trainers and create table rows
-  trainers.forEach((trainer, index) => {
-    const rank = index + 1;
-    const init = (trainer.username || 'T')[0].toUpperCase();
-    
-    // Style for Top 3 rankings
-    let rankDisplay = rank;
-    if (rank === 1) rankDisplay = `<span class="rank rank-1">1</span>`;
-    else if (rank === 2) rankDisplay = `<span class="rank rank-2">2</span>`;
-    else if (rank === 3) rankDisplay = `<span class="rank rank-3">3</span>`;
-    else rankDisplay = `<span class="rank">${rank}</span>`;
-
-    // Use Custom Image if it exists, otherwise use the colored Circle
-  
-const avatarHtml = (trainer.avatar_url && trainer.avatar_url.includes('http'))
-  ? `<img src="${trainer.avatar_url}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; border:2px solid var(--red-dk); display:block;">`
-  : `<div class="lb-av">${init}</div>`;
-
-    const row = `
-      <tr>
-        <td>${rankDisplay}</td>
-        <td>
-          <div class="lb-user">
-            ${avatarHtml}
-            ${trainer.username}
-          </div>
-        </td>
-        <td>${trainer.wins || 0} / ${trainer.losses || 0}</td>
-        <td class="pts">${trainer.points || 0}</td>
-      </tr>
-    `;
-    lbBody.innerHTML += row;
-  });
-
-
 /* ─── STATS ─── */
 async function loadStats() {
   const playerVal = document.getElementById('stat-players');
   const totalVal = document.getElementById('stat-total');
   const liveVal = document.getElementById('stat-live');
 
-  // 1. Get player count
   const { count: pCount } = await sb.from('profiles').select('*', { count: 'exact', head: true });
   if (playerVal) playerVal.textContent = pCount || 0;
 
-  // 2. Get tournament count (Assuming you have a 'tournaments' table)
   const { count: tCount } = await sb.from('tournaments').select('*', { count: 'exact', head: true });
   if (totalVal) totalVal.textContent = tCount || 0;
   
-  // 3. Get live count
   const { count: lCount } = await sb.from('tournaments').select('*', { count: 'exact', head: true }).eq('status', 'live');
   if (liveVal) liveVal.textContent = lCount || 0;
 }
 
+/* ─── TOURNAMENTS ─── */
 async function loadTournaments() {
   const liveContainer = document.getElementById('live-cards');
   const upcomingContainer = document.getElementById('upcoming-cards');
@@ -1188,15 +1250,10 @@ async function loadTournaments() {
   const upcomingSection = document.getElementById('tournaments-sec-upcoming');
   const pastSection = document.getElementById('tournaments-sec-past');
 
-  // Fetch all tournaments from Supabase
   const { data: tournaments, error } = await sb.from('tournaments').select('*').order('start_date', { ascending: false });
 
-  if (error || !tournaments || tournaments.length === 0) {
-    console.log("No tournaments found or error:", error);
-    return;
-  }
+  if (error || !tournaments || tournaments.length === 0) return;
 
-  // Clear all containers
   if (liveContainer) liveContainer.innerHTML = '';
   if (upcomingContainer) upcomingContainer.innerHTML = '';
   if (pastContainer) pastContainer.innerHTML = '';
@@ -1206,12 +1263,11 @@ async function loadTournaments() {
   let hasPast = false;
 
   tournaments.forEach(t => {
-    // 1. Determine Style based on status
     let statusClass = 'tag-upcoming';
     let statusText = t.status.toUpperCase();
     let liveDot = '';
 
-    if (t.status === 'live' || t.status === 'qualifications') {
+    if (t.status === 'live' || t.status === 'qualifications' || t.status === 'group_stage' || t.status === 'knockout') {
       statusClass = 'tag-live';
       liveDot = '<span class="live-dot"></span>';
     } else if (t.status === 'ended') {
@@ -1219,7 +1275,6 @@ async function loadTournaments() {
       statusText = 'FINISHED';
     }
 
-    // 2. Create the HTML Card
     const cardHtml = `
       <div class="t-card" onclick="window.location.href='tournament.html?id=${t.id}'">
         <div class="card-meta">
@@ -1228,31 +1283,27 @@ async function loadTournaments() {
         <h3 style="margin-top:10px">${t.name}</h3>
         <p>${t.theme || 'Standard Rules'}</p>
         <div class="card-meta">
-          <span class="tag tag-past">📅 ${t.start_date || 'TBD'}</span>
+          <span class="tag tag-past">📅 ${t.start_date ? new Date(t.start_date).toLocaleDateString() : 'TBD'}</span>
           <span class="tag tag-past">👤 ${t.max_players || 32} Max</span>
         </div>
       </div>`;
 
-    // 3. Sort into correct container
-    if (t.status === 'live' || t.status === 'qualifications') {
+    if (t.status === 'live' || t.status === 'qualifications' || t.status === 'group_stage' || t.status === 'knockout') {
       if (liveContainer) liveContainer.innerHTML += cardHtml;
       hasLive = true;
     } else if (t.status === 'ended') {
       if (pastContainer) pastContainer.innerHTML += cardHtml;
       hasPast = true;
     } else {
-      // Registration, Upcoming, Validation, etc.
       if (upcomingContainer) upcomingContainer.innerHTML += cardHtml;
       hasUpcoming = true;
     }
   });
 
-  // 4. Show/Hide whole sections based on content
   if (liveSection) liveSection.style.display = hasLive ? 'block' : 'none';
   if (upcomingSection) upcomingSection.style.display = hasUpcoming ? 'block' : 'none';
   if (pastSection) pastSection.style.display = hasPast ? 'block' : 'none';
 }
-
 </script>
 </body>
 </html>
