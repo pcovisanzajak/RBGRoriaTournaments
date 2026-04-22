@@ -4,8 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RBG Roria Tournaments</title>
-<link rel="icon" type="image/svg+xml" href="Gemini_Generated_Image_9l05hr9l05hr9l05__1_-removebg-preview.png" viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23e3350d' stroke='%232a2a2a' stroke-width='4'/%3E%3Crect x='2' y='46' width='96' height='8' fill='%232a2a2a'/%3E%3Ccircle cx='50' cy='74' r='48' fill='%23f8f8f8' stroke='none'/%3E%3Ccircle cx='50' cy='50' r='16' fill='%23f8f8f8' stroke='%232a2a2a' stroke-width='4'/%3E%3Ccircle cx='50' cy='50' r='8' fill='%232a2a2a'/%3E%3C/svg%3E">
-
+<link rel="icon" type="image/svg+xml" href="Gemini_Generated_Image_9l05hr9l05hr9l05__1_-removebg-preview.png">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -893,7 +892,32 @@
       <button class="btn-poke btn-outline" onclick="closeModal('login')">Cancel</button>
       <button class="btn-poke btn-red" id="li-btn" onclick="handleLogin()">Log In</button>
     </div>
-    <div class="modal-switch">No account? <a onclick="switchModal('login','signup')">Sign Up</a></div>
+    <div class="modal-switch">
+      No account? <a onclick="switchModal('login','signup')">Sign Up</a><br><br>
+      Forgot password? <a onclick="switchModal('login','forgot')">Reset it</a>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="forgotModal">
+  <div class="modal">
+    <div class="modal-x" onclick="closeModal('forgot')">✕</div>
+    <div class="modal-title">Reset Password</div>
+    <div class="modal-sub">Enter the email associated with your account.</div>
+    <div class="status-msg" id="fp-status"></div>
+
+    <div class="field" id="ff-email">
+      <label>Email Address</label>
+      <input type="email" id="fp-email" placeholder="trainer@example.com">
+      <div class="field-note">Note: If you didn't provide a real email during signup, please contact an admin on Discord.</div>
+      <div class="field-err">Email is required</div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-poke btn-outline" onclick="closeModal('forgot')">Cancel</button>
+      <button class="btn-poke btn-red" id="fp-btn" onclick="handleForgotPassword()">Send Link</button>
+    </div>
+    <div class="modal-switch">Remembered it? <a onclick="switchModal('forgot','login')">Log In</a></div>
   </div>
 </div>
 
@@ -1113,6 +1137,26 @@ async function handleLogin() {
   toast('⚡ Logged in!');
 }
 
+/* ─── FORGOT PASSWORD ─── */
+async function handleForgotPassword() {
+  clearErrors('ff');
+  const email = v('fp-email');
+  if (!email) { setErr('ff-email'); return; }
+
+  setBtnLoading('fp-btn', true);
+
+  const { data, error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/account.html',
+  });
+
+  if (error) {
+    showStatus('fp-status', 'err', error.message);
+  } else {
+    showStatus('fp-status', 'ok', 'Password reset link sent! Check your email.');
+  }
+  setBtnLoading('fp-btn', false);
+}
+
 /* ─── LOG OUT ─── */
 async function handleLogout() {
   await sb.auth.signOut();
@@ -1125,7 +1169,8 @@ async function handleLogout() {
 function v(id) { return document.getElementById(id).value.trim(); }
 function setErr(id) { document.getElementById(id).classList.add('err'); }
 function clearErrors(prefix) {
-  document.querySelectorAll(`[id^="${prefix === 'su' ? 'sf' : 'lf'}-"]`).forEach(el => el.classList.remove('err'));
+  const p = prefix === 'su' ? 'sf' : (prefix === 'li' ? 'lf' : 'ff');
+  document.querySelectorAll(`[id^="${p}-"]`).forEach(el => el.classList.remove('err'));
 }
 function showStatus(id, type, msg) {
   const el = document.getElementById(id);
@@ -1135,7 +1180,13 @@ function showStatus(id, type, msg) {
 function setBtnLoading(id, loading) {
   const btn = document.getElementById(id);
   btn.disabled = loading;
-  btn.textContent = loading ? '...' : (id === 'su-btn' ? 'Sign Up' : 'Log In');
+  if (loading) {
+    btn.textContent = '...';
+  } else {
+    if (id === 'su-btn') btn.textContent = 'Sign Up';
+    else if (id === 'li-btn') btn.textContent = 'Log In';
+    else if (id === 'fp-btn') btn.textContent = 'Send Link';
+  }
 }
 function toast(msg) {
   const t = document.getElementById('toast');
