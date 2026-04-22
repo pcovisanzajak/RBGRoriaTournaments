@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Article – RBG Roria Tournaments</title>
+<link rel="icon" type="image/svg+xml" href="Gemini_Generated_Image_9l05hr9l05hr9l05__1_-removebg-preview.png">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --red:     #e3350d;
+    --red-dk:  #b02a0a;
+    --yellow:  #f7c948;
+    --blue:    #2c6fad;
+    --off:     #ece8df;
+    --card:    #ffffff;
+    --border:  #c8c0b0;
+    --text:    #2a2a2a;
+    --muted:   #7a7265;
+    --green:   #4caf50;
+    --nav-h:   60px;
+    --shadow:  0 4px 0 rgba(0,0,0,0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--off);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: radial-gradient(circle, rgba(0,0,0,0.06) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ══════ NAV ══════ */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: var(--nav-h);
+    background: var(--red);
+    border-bottom: 4px solid var(--red-dk);
+    display: flex; align-items: center;
+    padding: 0 20px; gap: 16px;
+    z-index: 200;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+  .hamburger {
+    width: 40px; height: 40px;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center; gap: 5px;
+    cursor: pointer; border-radius: 8px;
+    border: 2px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+    transition: background .2s; flex-shrink: 0;
+  }
+  .hamburger span { display: block; width: 18px; height: 2px; background: #fff; border-radius: 2px; transition: transform .3s, opacity .3s; transform-origin: center; }
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .nav-logo {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center;
+    line-height: 1; pointer-events: none; user-select: none; text-decoration: none;
+  }
+  .nav-logo .top-line { font-family: 'Press Start 2P', monospace; font-size: 9px; color: var(--yellow); letter-spacing: 3px; text-shadow: 1px 1px 0 rgba(0,0,0,0.3); }
+  .nav-logo .bottom-line { font-family: 'Press Start 2P', monospace; font-size: 13px; color: #fff; letter-spacing: 1px; text-shadow: 2px 2px 0 rgba(0,0,0,0.3); }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+  /* ══════ DRAWER ══════ */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 300; opacity: 0; pointer-events: none; transition: opacity .3s; }
+  .overlay.open { opacity: 1; pointer-events: all; }
+  .drawer {
+    position: fixed; top: 0; left: 0; width: 280px; height: 100%;
+    background: #fff; border-right: 4px solid var(--border);
+    z-index: 400; transform: translateX(-100%);
+    transition: transform .32s cubic-bezier(.4,0,.2,1);
+    display: flex; flex-direction: column; box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header { background: var(--red); border-bottom: 4px solid var(--red-dk); padding: 18px 20px; display: flex; flex-direction: column; align-items: flex-start; }
+  .drawer-header .site-tag { font-family: 'Press Start 2P', monospace; font-size: 7px; color: var(--yellow); letter-spacing: 2px; margin-bottom: 4px; }
+  .drawer-header .site-name { font-family: 'Press Start 2P', monospace; font-size: 11px; color: #fff; line-height: 1.6; }
+  .drawer-section { padding: 14px 20px 6px; font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+  .drawer-item { display: flex; align-items: center; gap: 14px; padding: 13px 20px; cursor: pointer; font-size: 15px; font-weight: 700; color: var(--text); text-decoration: none; border-left: 4px solid transparent; transition: all .15s; }
+  .drawer-item:hover, .drawer-item.active { background: var(--off); border-left-color: var(--red); color: var(--red); }
+  
+  .drawer-user-section { padding: 16px 20px; background: var(--off); border-top: 1px solid var(--border); margin-top: auto; }
+  .drawer-user-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .drawer-av { width: 38px; height: 38px; border-radius: 50%; background: var(--red); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: #fff; border: 3px solid var(--red-dk); }
+  .drawer-uname { font-weight: 800; font-size: 15px; color: var(--text); }
+  .drawer-suname { font-size: 12px; color: var(--muted); }
+  .drawer-logout { width: 100%; padding: 9px; border-radius: 8px; background: transparent; border: 2px solid var(--border); font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px; color: var(--muted); cursor: pointer; transition: all .2s; }
+  .drawer-logout:hover { border-color: var(--red); color: var(--red); }
+
+  /* ══════ USER CHIP & BUTTONS ══════ */
+  .nav-btn { padding: 7px 16px; border-radius: 20px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px; cursor: pointer; border: 2px solid transparent; transition: all .2s; white-space: nowrap; text-decoration: none; }
+  .nav-btn-ghost { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4); color: #fff; }
+  .nav-btn-solid { background: var(--yellow); border-color: #d4a017; color: #2a2a2a; box-shadow: 0 3px 0 #d4a017; }
+  .user-chip { display: flex; align-items: center; gap: 8px; padding: 5px 14px 5px 7px; background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); border-radius: 20px; cursor: pointer; transition: background .2s; }
+  .user-chip .av { width: 28px; height: 28px; border-radius: 50%; background: var(--yellow); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: var(--red-dk); border: 2px solid #fff; font-family: 'Nunito', sans-serif; }
+  .user-chip .uname { color: #fff; font-weight: 800; font-size: 13px; }
+
+  /* ══════ ARTICLE STYLING ══════ */
+  .page { position: relative; z-index: 1; flex: 1 0 auto; }
+  .article-hero { margin-top: var(--nav-h); min-height: 220px; display: flex; align-items: center; justify-content: center; font-size: 90px; position: relative; overflow: hidden; background: linear-gradient(135deg, var(--red) 0%, var(--red-dk) 100%); }
+  .article-hero::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 80%, rgba(247,201,72,0.18), transparent 60%); }
+  .article-container { max-width: 760px; margin: 0 auto; padding: 0 20px 80px; }
+
+  /* Meta bar */
+  .article-meta-bar { background: var(--card); border: 3px solid var(--border); border-top: none; border-radius: 0 0 14px 14px; padding: 20px 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; box-shadow: var(--shadow); margin-bottom: 28px; opacity: 0; animation: fadeUp .4s .1s forwards; }
+  .news-tag { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; letter-spacing: .5px; border: 2px solid transparent; text-transform: uppercase; }
+  .news-tag-announcement { background: #ffe5e5; border-color: #f4a0a0; color: var(--red); }
+  .news-tag-tournament   { background: #fff8e0; border-color: #f0d060; color: #a07800; }
+  .news-tag-update       { background: #e0eeff; border-color: #90b8f0; color: var(--blue); }
+  .news-tag-community    { background: #e0ffe5; border-color: #80d090; color: #256030; }
+  .article-date { font-size: 13px; font-weight: 700; color: var(--muted); }
+
+  /* Main Card */
+  .article-body { background: var(--card); border: 3px solid var(--border); border-radius: 14px; padding: 40px; box-shadow: var(--shadow); margin-bottom: 28px; opacity: 0; animation: fadeUp .4s .2s forwards; position: relative; overflow: hidden; }
+  .article-body::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: var(--red); }
+
+  /* Title */
+  .article-title { font-family: 'Press Start 2P', monospace; font-size: clamp(14px, 3vw, 20px); line-height: 1.6; color: var(--text); margin-bottom: 40px; text-align: center; }
+
+  /* Content Separation Tools */
+  .content-heading { font-family: 'Press Start 2P', monospace; font-size: 11px; color: var(--red); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+  .content-divider { height: 4px; background: var(--off); border: none; margin: 40px 0; border-radius: 2px; }
+  
+  .description-text { font-family: 'Press Start 2P', monospace; font-size: 11px; line-height: 2; color: var(--text); }
+  .description-text p { margin-bottom: 20px; }
+  .description-text p:last-child { margin-bottom: 0; }
+
+  /* ══════ BEIGE RULE BOX ══════ */
+  .rules-section { background: var(--off); border: 3px solid var(--border); border-radius: 12px; padding: 28px; margin: 0; box-shadow: inset 0 2px 8px rgba(0,0,0,0.03); }
+  .rules-section h2 { font-family: 'Press Start 2P', monospace; font-size: 13px; margin-top: 0; margin-bottom: 24px; border-bottom: 3px solid var(--border); padding-bottom: 14px; color: var(--text); }
+  .rule-row { font-family: 'Press Start 2P', monospace; font-size: 11px; line-height: 2; margin-bottom: 18px; display: flex; align-items: flex-start; gap: 12px; }
+  .rule-row:last-child { margin-bottom: 0; }
+  
+  .allowed { color: var(--green); font-weight: 800; }
+  .banned { color: var(--red); font-weight: 800; }
+
+  /* Back Button */
+  .btn-wrap { text-align: center; margin-top: 40px; }
+  .back-btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; border-radius: 12px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 15px; cursor: pointer; border: 3px solid var(--border); background: var(--card); color: var(--text); box-shadow: 0 4px 0 var(--border); text-decoration: none; transition: all .15s; }
+  .back-btn:hover { transform: translateY(2px); box-shadow: 0 2px 0 var(--border); border-color: var(--red); color: var(--red); }
+
+  footer { position: relative; z-index: 1; background: var(--text); color: rgba(255,255,255,0.5); text-align: center; padding: 28px 20px; font-family: 'Press Start 2P', monospace; font-size: 8px; letter-spacing: 2px; line-height: 2; margin-top: auto; }
+  footer span { color: var(--yellow); }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  
+  @media (max-width: 600px) { .article-body { padding: 24px; } .rules-section { padding: 18px; } .rule-row { flex-direction: column; gap: 4px; margin-bottom: 24px;} }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="hamburger" id="hamburger" onclick="toggleDrawer()"><span></span><span></span><span></span></div>
+  <a href="index.html" class="nav-logo">
+    <span class="top-line">RBG</span>
+    <span class="bottom-line">RORIA TOURNAMENTS</span>
+  </a>
+  <div class="nav-right" id="navRight"></div>
+</nav>
+
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header"><div class="site-name">RORIA<br>TOURNAMENTS</div></div>
+  <div class="drawer-section">Menu</div>
+  <a class="drawer-item" href="index.html"><span class="di-icon">🏠</span> Home</a>
+  <a class="drawer-item" href="index.html#leaderboard"><span class="di-icon">🏆</span> Leaderboard</a>
+  <a class="drawer-item" href="index.html#live"><span class="di-icon">⚡</span> Tournaments</a>
+  <div class="drawer-divider"></div>
+  <div class="drawer-section">Info</div>
+  <a class="drawer-item active" href="news.html"><span class="di-icon">📰</span> News</a>
+  <a class="drawer-item" href="about.html"><span class="di-icon">👥</span> About Us</a>
+  <div id="drawerUserSection"></div>
+</div>
+
+<div class="page" id="pageContent"></div>
+
+<footer><span>RBG</span> RORIA TOURNAMENTS &nbsp;·&nbsp; © 2026 &nbsp;·&nbsp; ALL RIGHTS RESERVED</footer>
+
+<script>
+const SUPABASE_URL  = 'https://lvtmmtvxozabealfxqmy.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_tJbIaorQ_wp3Qt5_Vxwwgw_x7dcGc7-';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+let profile = null;
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) await loadProfile(session.user);
+  else renderNav();
+
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (session) { await loadProfile(session.user); }
+    else { profile = null; renderNav(); }
+  });
+});
+
+async function loadProfile(user) {
+  const { data } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  profile = data;
+  renderNav();
+}
+
+function renderNav() {
+  const nr = document.getElementById('navRight');
+  const ds = document.getElementById('drawerUserSection');
+  if (!nr) return;
+
+  if (profile) {
+    const init = (profile.username || 'T')[0].toUpperCase();
+    const avHtml = (profile.avatar_url && profile.avatar_url.includes('http'))
+      ? `<img src="${profile.avatar_url}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid #fff;">`
+      : `<div class="av">${init}</div>`;
+
+    nr.innerHTML = `<div class="user-chip" onclick="window.location.href='account.html'">${avHtml}<span class="uname">${profile.username}</span></div>`;
+
+    if (ds) {
+      const drawerAv = (profile.avatar_url && profile.avatar_url.includes('http'))
+        ? `<img src="${profile.avatar_url}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:3px solid var(--red-dk);">`
+        : `<div class="drawer-av">${init}</div>`;
+
+      ds.innerHTML = `
+        <div class="drawer-user-section">
+          <div class="drawer-user-row">
+            ${drawerAv}
+            <div><div class="drawer-uname">${profile.username}</div><div class="drawer-suname">@${profile.roria_username || 'trainer'}</div></div>
+          </div>
+          <button class="drawer-logout" onclick="handleLogout()">Log Out</button>
+        </div>`;
+    }
+  } else {
+    nr.innerHTML = `<a class="nav-btn nav-btn-ghost" href="index.html">Log In</a> <a class="nav-btn nav-btn-solid" href="index.html">Sign Up</a>`;
+    if (ds) ds.innerHTML = '';
+  }
+}
+
+async function handleLogout() {
+  await sb.auth.signOut();
+  window.location.href = 'index.html';
+}
+
+const CATEGORY_META = {
+  Announcement: { tagClass: 'news-tag-announcement', emoji: '📢', heroBg: 'linear-gradient(135deg, #e3350d 0%, #b02a0a 100%)' },
+  Tournament: { tagClass: 'news-tag-tournament', emoji: '🏆', heroBg: 'linear-gradient(135deg, #2c6fad 0%, #1a4a7a 100%)' },
+  Update: { tagClass: 'news-tag-update', emoji: '⚙️', heroBg: 'linear-gradient(135deg, #3a9a4a 0%, #1e6630 100%)' },
+  Community: { tagClass: 'news-tag-community', emoji: '⭐', heroBg: 'linear-gradient(135deg, #c89010 0%, #a07000 100%)' },
+};
+
+function getCategoryMeta(cat) { return CATEGORY_META[cat] || { tagClass: 'news-tag-announcement', emoji: '📰', heroBg: 'linear-gradient(135deg, #e3350d 0%, #b02a0a 100%)' }; }
+
+async function loadArticle() {
+  const id = new URLSearchParams(window.location.search).get('id');
+  const container = document.getElementById('pageContent');
+
+  if (!id) return container.innerHTML = `<div class="article-container" style="padding-top:100px;text-align:center;font-weight:800;">No Article Selected<br><br><a href="news.html" class="back-btn">Return to News</a></div>`;
+
+  const { data: article, error } = await sb.from('news_articles').select('*').eq('id', id).single();
+  if (error || !article) return container.innerHTML = `<div class="article-container" style="padding-top:100px;text-align:center;font-weight:800;">Article Not Found<br><br><a href="news.html" class="back-btn">Return to News</a></div>`;
+
+  const meta = getCategoryMeta(article.category);
+  const formattedDate = new Date(article.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  document.title = article.title + ' – RBG Roria';
+
+  let contentHtml = article.content || article.excerpt || '<p>No content available.</p>';
+
+  container.innerHTML = `
+    <div class="article-hero" style="background: ${meta.heroBg};">${meta.emoji}</div>
+    <div class="article-container">
+      <div class="article-meta-bar">
+        <span class="news-tag ${meta.tagClass}">${article.category || 'News'}</span>
+        <span class="article-date">📅 ${formattedDate}</span>
+      </div>
+      <div class="article-body">
+        <h1 class="article-title">${article.title}</h1>
+        ${contentHtml}
+        <div class="btn-wrap"><a class="back-btn" href="news.html">← Back to News</a></div>
+      </div>
+    </div>
+  `;
+}
+
+function toggleDrawer() { document.getElementById('drawer').classList.toggle('open'); document.getElementById('overlay').classList.toggle('open'); document.getElementById('hamburger').classList.toggle('open'); }
+function closeDrawer() { document.getElementById('drawer').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); document.getElementById('hamburger').classList.remove('open'); }
+
+loadArticle();
+</script>
+</body>
+</html>
