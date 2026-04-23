@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Account – RBG Roria Tournaments</title>
-<link rel="icon" type="image/svg+xml" href="Gemini_Generated_Image_9l05hr9l05hr9l05__1_-removebg-preview.png" viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23e3350d' stroke='%232a2a2a' stroke-width='4'/%3E%3Crect x='2' y='46' width='96' height='8' fill='%232a2a2a'/%3E%3Ccircle cx='50' cy='74' r='48' fill='%23f8f8f8' stroke='none'/%3E%3Ccircle cx='50' cy='50' r='16' fill='%23f8f8f8' stroke='%232a2a2a' stroke-width='4'/%3E%3Ccircle cx='50' cy='50' r='8' fill='%232a2a2a'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="Gemini_Generated_Image_9l05hr9l05hr9l05__1_-removebg-preview.png">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -110,7 +110,7 @@
   .profile-av img { width: 100%; height: 100%; object-fit: cover; display: none; }
   .edit-av-btn { position: absolute; bottom: 0; right: 0; width: 34px; height: 34px; background: var(--yellow); border: 3px solid var(--text); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; z-index: 2;}
 
-  .prof-user { font-family: 'Press Start 2P', monospace; font-size: 16px; margin-bottom: 5px; text-align: center; }
+  .prof-user { font-family: 'Press Start 2P', monospace; font-size: 16px; margin-bottom: 0; text-align: center; }
   .prof-roria { color: var(--muted); font-weight: 700; margin-bottom: 20px; text-align: center; display: block; }
 
   .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 24px; }
@@ -194,7 +194,6 @@
     <div class="profile-layout">
   
       <div class="profile-side">
-        
         <div class="profile-card">
           <div class="avatar-container">
             <div class="profile-av" id="prof-av">
@@ -205,7 +204,10 @@
             <input type="file" id="avatar-input" style="display:none" accept="image/*" onchange="uploadIcon(this)">
           </div>
 
-          <h2 class="prof-user" id="prof-username">Loading...</h2>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 5px;">
+            <h2 class="prof-user" id="prof-username">Loading...</h2>
+            <button class="edit-av-btn" style="position: static; width: 22px; height: 22px; font-size: 10px; border-width: 2px;" title="Edit Name" onclick="editName()">✎</button>
+          </div>
           <p class="prof-roria" id="prof-roria-name">@...</p>
           
           <div class="prof-bio-box">
@@ -214,19 +216,6 @@
             <textarea id="prof-bio-input" class="field" style="display:none; width: 100%; min-height: 80px; margin-bottom: 10px;"></textarea>
             <button class="btn-poke btn-ghost" id="edit-bio-btn" onclick="toggleBioEdit()">Edit Bio</button>
           </div>
-        </div>
-
-        <div class="profile-card">
-          <h3 class="sec-title" style="font-size: 12px; margin-bottom: 15px; font-family: 'Press Start 2P', monospace;">Account Settings</h3>
-          <div class="field">
-            <label>Display Name</label>
-            <input type="text" id="update-user" placeholder="New Name">
-          </div>
-          <div class="field">
-            <label>New Password</label>
-            <input type="password" id="update-pass" placeholder="••••••••">
-          </div>
-          <button class="btn-poke" onclick="updateAccount()">Save Changes</button>
         </div>
       </div>
 
@@ -281,9 +270,6 @@
 <div id="toast" class="toast"></div>
 
 <script>
-/* ══════════════════════════════════════════
-   SUPABASE CONFIG & INITIALIZATION
-══════════════════════════════════════════ */
 const SUPABASE_URL  = 'https://lvtmmtvxozabealfxqmy.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_tJbIaorQ_wp3Qt5_Vxwwgw_x7dcGc7-';
 const { createClient } = supabase;
@@ -293,45 +279,20 @@ let currentUser = null;
 let profile = null;
 
 window.addEventListener('DOMContentLoaded', async () => {
-  // Check auth session
   const { data: { session } } = await sb.auth.getSession();
-  
-  if (!session) {
-    // If not logged in, boot them back to the homepage
-    window.location.href = 'index.html';
-    return;
-  }
-
-  // Load user data
+  if (!session) { window.location.href = 'index.html'; return; }
   await loadProfile(session.user);
-
-  // Listen for auth state changes
   sb.auth.onAuthStateChange(async (event, session) => {
-    if (session) { 
-      await loadProfile(session.user); 
-    } else { 
-      window.location.href = 'index.html'; 
-    }
+    if (session) await loadProfile(session.user); 
+    else window.location.href = 'index.html'; 
   });
 });
 
-/* ══════════════════════════════════════════
-   DATA LOADING
-══════════════════════════════════════════ */
 async function loadProfile(user) {
   currentUser = user;
-  
-  // Fetch Profile DB Data
   const { data, error } = await sb.from('profiles').select('*').eq('id', user.id).single();
-  if (error) {
-    console.error("Profile Fetch Error:", error);
-    toast("❌ Error loading profile");
-    return;
-  }
-  
+  if (error) { toast("❌ Error loading profile"); return; }
   profile = data;
-  
-  // Update the UI
   updateUI();
   renderNav();
   loadHistory(user.id);
@@ -339,234 +300,101 @@ async function loadProfile(user) {
 
 function updateUI() {
   if (!profile) return;
-  
-  // Text fields
   document.getElementById('prof-username').textContent = profile.username;
   document.getElementById('prof-roria-name').textContent = '@' + (profile.roria_username || 'trainer');
   document.getElementById('prof-bio-text').textContent = profile.bio || "No bio set. Tell the world about your team!";
   
-  // Inputs
-  document.getElementById('update-user').value = profile.username;
-  
-  // Stats
   document.getElementById('rec-wins').textContent = profile.wins || 0;
   document.getElementById('rec-losses').textContent = profile.losses || 0;
   document.getElementById('rec-draws').textContent = profile.draws || 0;
   document.getElementById('rec-total').textContent = (profile.wins || 0) + (profile.losses || 0) + (profile.draws || 0);
   
-  // Avatar
   updateAvatarDisplay(profile.avatar_url, profile.username);
 }
 
 function updateAvatarDisplay(url, username) {
   const imgEl = document.getElementById('prof-av-img');
   const letterEl = document.getElementById('prof-av-letter');
-  
   if (url && url.includes('http')) {
-    imgEl.src = url;
-    imgEl.style.display = 'block';
-    letterEl.style.display = 'none';
+    imgEl.src = url; imgEl.style.display = 'block'; letterEl.style.display = 'none';
   } else {
-    imgEl.style.display = 'none';
-    letterEl.style.display = 'flex';
-    letterEl.textContent = (username || 'T')[0].toUpperCase();
+    imgEl.style.display = 'none'; letterEl.style.display = 'flex'; letterEl.textContent = (username || 'T')[0].toUpperCase();
+  }
+}
+
+async function editName() {
+  const newName = prompt("Enter your new display name:", profile.username);
+  if (!newName || newName.trim() === "" || newName.trim() === profile.username) return;
+
+  const { error } = await sb.from('profiles').update({ username: newName.trim() }).eq('id', currentUser.id);
+  if (error) {
+    toast("❌ Failed to update name");
+  } else {
+    profile.username = newName.trim();
+    document.getElementById('prof-username').textContent = profile.username;
+    renderNav();
+    toast("✨ Name updated!");
   }
 }
 
 async function loadHistory(userId) {
-  // Fetch tournaments the user is registered in
-  const { data, error } = await sb
-    .from('tournament_participants')
-    .select(`
-      id,
-      tournaments ( id, name, start_date, status )
-    `)
-    .eq('profile_id', userId)
-    .order('created_at', { ascending: false });
-
+  const { data, error } = await sb.from('tournament_participants').select(`id, tournaments ( id, name, start_date, status )`).eq('profile_id', userId).order('created_at', { ascending: false });
   const tbody = document.getElementById('tournament-history-body');
-  
-  if (error || !data || data.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--muted); padding: 40px;">No tournament data found. Join an event!</td></tr>';
-    return;
-  }
-
+  if (error || !data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: var(--muted); padding: 40px;">No tournament data found. Join an event!</td></tr>'; return; }
   tbody.innerHTML = data.map(row => {
-    const t = row.tournaments;
-    if (!t) return '';
-    
-    const date = t.start_date ? new Date(t.start_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'TBD';
-    let statusClass = 'tag-upcoming';
-    let statusText = t.status.toUpperCase();
-    
+    const t = row.tournaments; if (!t) return '';
+    const date = t.start_date ? new Date(t.start_date).toLocaleDateString() : 'TBD';
+    let statusClass = 'tag-upcoming'; let statusText = t.status.toUpperCase();
     if (t.status === 'live' || t.status === 'group_stage' || t.status === 'qualifications') statusClass = 'tag-live';
     else if (t.status === 'ended') statusClass = 'tag-past';
-    
-    return `
-      <tr>
-        <td><a href="tournament.html?id=${t.id}" style="color:var(--red); font-weight:800; text-decoration:none;">${t.name}</a></td>
-        <td>${date}</td>
-        <td><span class="tag ${statusClass}">${statusText}</span></td>
-      </tr>`;
+    return `<tr><td><a href="tournament.html?id=${t.id}" style="color:var(--red); font-weight:800; text-decoration:none;">${t.name}</a></td><td>${date}</td><td><span class="tag ${statusClass}">${statusText}</span></td></tr>`;
   }).join('');
 }
 
-/* ══════════════════════════════════════════
-   NAVIGATION
-══════════════════════════════════════════ */
 function renderNav() {
   const nr = document.getElementById('navRight');
   const ds = document.getElementById('drawerUserSection');
   if (!profile || !nr) return;
-
   const init = profile.username[0].toUpperCase();
-  const avHtml = (profile.avatar_url && profile.avatar_url.includes('http')) 
-    ? `<img src="${profile.avatar_url}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:2px solid #fff;">`
-    : `<div class="av">${init}</div>`;
-
-  // Top Nav
+  const avHtml = (profile.avatar_url && profile.avatar_url.includes('http')) ? `<img src="${profile.avatar_url}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:2px solid #fff;">` : `<div class="av">${init}</div>`;
   nr.innerHTML = `<div class="user-chip">${avHtml}<span class="uname">${profile.username}</span></div>`;  
-  // Drawer
   if (ds) {
-    const drawerAv = (profile.avatar_url && profile.avatar_url.includes('http')) 
-      ? `<img src="${profile.avatar_url}" style="width:38px; height:38px; border-radius:50%; object-fit:cover; border: 3px solid var(--red-dk);">`
-      : `<div class="drawer-av">${init}</div>`;
-      
-    ds.innerHTML = `
-      <div class="drawer-user-section">
-        <div class="drawer-user-row">
-          ${drawerAv}
-          <div>
-            <div class="drawer-uname">${profile.username}</div>
-            <div class="drawer-suname">@${profile.roria_username || 'trainer'}</div>
-          </div>
-        </div>
-        <button class="drawer-logout" onclick="handleLogout()">Log Out</button>
-      </div>`;
+    const drawerAv = (profile.avatar_url && profile.avatar_url.includes('http')) ? `<img src="${profile.avatar_url}" style="width:38px; height:38px; border-radius:50%; object-fit:cover; border: 3px solid var(--red-dk);">` : `<div class="drawer-av">${init}</div>`;
+    ds.innerHTML = `<div class="drawer-user-section"><div class="drawer-user-row">${drawerAv}<div><div class="drawer-uname">${profile.username}</div><div class="drawer-suname">@${profile.roria_username || 'trainer'}</div></div></div><button class="drawer-logout" onclick="handleLogout()">Log Out</button></div>`;
   }
 }
 
-async function handleLogout() {
-  await sb.auth.signOut();
-  window.location.href = 'index.html';
-}
-
+async function handleLogout() { await sb.auth.signOut(); window.location.href = 'index.html'; }
 function toggleDrawer() { document.getElementById('drawer').classList.toggle('open'); document.getElementById('overlay').classList.toggle('open'); }
 function closeDrawer() { document.getElementById('drawer').classList.remove('open'); document.getElementById('overlay').classList.remove('open'); }
 
-/* ══════════════════════════════════════════
-   UPDATING ACCOUNT
-══════════════════════════════════════════ */
-async function updateAccount() {
-  const newName = document.getElementById('update-user').value.trim();
-  const newPass = document.getElementById('update-pass').value;
-
-  if (!newName) return toast("⚠️ Display name cannot be empty!");
-
-  let successMsg = "✨ Changes saved!";
-
-  // 1. Update Display Name in Database
-  if (newName !== profile.username) {
-    const { error } = await sb.from('profiles').update({ username: newName }).eq('id', currentUser.id);
-    if (error) return toast("❌ Failed to update name");
-    profile.username = newName;
-  }
-
-  // 2. Update Password if provided
-  if (newPass) {
-    if (newPass.length < 8) return toast("⚠️ Password must be at least 8 characters");
-    const { error } = await sb.auth.updateUser({ password: newPass });
-    if (error) return toast("❌ Failed to update password");
-    document.getElementById('update-pass').value = ''; // clear field
-    successMsg = "🔐 Password updated!";
-  }
-
-  updateUI();
-  renderNav();
-  toast(successMsg);
-}
-
 async function toggleBioEdit() {
-  const textEl = document.getElementById('prof-bio-text');
-  const inputEl = document.getElementById('prof-bio-input');
-  const btn = document.getElementById('edit-bio-btn');
-  
+  const textEl = document.getElementById('prof-bio-text'); const inputEl = document.getElementById('prof-bio-input'); const btn = document.getElementById('edit-bio-btn');
   if (inputEl.style.display === 'none') {
-    // Switch to edit mode
-    inputEl.value = profile.bio || "";
-    textEl.style.display = 'none'; 
-    inputEl.style.display = 'block'; 
-    btn.textContent = "Save Bio";
-    btn.classList.remove('btn-ghost');
+    inputEl.value = profile.bio || ""; textEl.style.display = 'none'; inputEl.style.display = 'block'; btn.textContent = "Save Bio"; btn.classList.remove('btn-ghost');
   } else {
-    // Save changes
     const newBio = inputEl.value.trim();
     const { error } = await sb.from('profiles').update({ bio: newBio }).eq('id', currentUser.id);
-    
-    if (error) {
-      toast("❌ Failed to update bio");
-    } else {
-      profile.bio = newBio; 
-      textEl.textContent = newBio || "No bio set. Tell the world about your team!";
-      textEl.style.display = 'block'; 
-      inputEl.style.display = 'none'; 
-      btn.textContent = "Edit Bio";
-      btn.classList.add('btn-ghost');
-      toast("✨ Bio Updated!");
-    }
+    if (error) toast("❌ Failed to update bio");
+    else { profile.bio = newBio; textEl.textContent = newBio || "No bio set. Tell the world about your team!"; textEl.style.display = 'block'; inputEl.style.display = 'none'; btn.textContent = "Edit Bio"; btn.classList.add('btn-ghost'); toast("✨ Bio Updated!"); }
   }
 }
 
 async function uploadIcon(input) {
   if (!input.files || input.files.length === 0) return;
-  
-  const file = input.files[0];
-  if (file.size > 2 * 1024 * 1024) return toast("❌ File too large (Max 2MB)");
-
+  const file = input.files[0]; if (file.size > 2 * 1024 * 1024) return toast("❌ File too large (Max 2MB)");
   toast("⏳ Uploading...");
-  
-  const fileExt = file.name.split('.').pop();
-  const fileName = `${currentUser.id}/avatar.${fileExt}`;
-
-  // 1. Upload to Supabase Storage
-  const { error: uploadError } = await sb.storage
-    .from('avatars')
-    .upload(fileName, file, { upsert: true });
-
-  if (uploadError) {
-    console.error("Upload error:", uploadError);
-    return toast("❌ Upload failed");
-  }
-
-  // 2. Get Public URL
+  const fileExt = file.name.split('.').pop(); const fileName = `${currentUser.id}/avatar.${fileExt}`;
+  const { error: uploadError } = await sb.storage.from('avatars').upload(fileName, file, { upsert: true });
+  if (uploadError) return toast("❌ Upload failed");
   const { data: urlData } = sb.storage.from('avatars').getPublicUrl(fileName);
-  const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`; // Bypass cache
-
-  // 3. Save URL to Profile DB
-  const { error: updateError } = await sb
-    .from('profiles')
-    .update({ avatar_url: publicUrl })
-    .eq('id', currentUser.id);
-
-  if (updateError) {
-    console.error("Profile update error:", updateError);
-    return toast("❌ Database update failed");
-  }
-
-  // 4. Update UI
-  profile.avatar_url = publicUrl;
-  updateUI(); 
-  renderNav();
-  toast("✅ Icon Updated!");
+  const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+  const { error: updateError } = await sb.from('profiles').update({ avatar_url: publicUrl }).eq('id', currentUser.id);
+  if (updateError) return toast("❌ Database update failed");
+  profile.avatar_url = publicUrl; updateUI(); renderNav(); toast("✅ Icon Updated!");
 }
 
-/* ─── TOAST ─── */
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; 
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
 </script>
 </body>
 </html>

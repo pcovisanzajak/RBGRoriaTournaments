@@ -933,7 +933,7 @@ let currentUser = null;
 let profile = null;
 
 window.addEventListener('DOMContentLoaded', async () => {
-  // 1. Check for basic link errors first
+  // 1. Check for basic link errors from old attempts
   const hash = window.location.hash;
   const search = window.location.search;
   
@@ -945,37 +945,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // 2. Auth state listener (Includes the Password Recovery detection!)
+  // 2. Auth state listener 
   sb.auth.onAuthStateChange(async (event, session) => {
-    // If Supabase detects a password reset link was clicked:
-    if (event === 'PASSWORD_RECOVERY') {
-      setTimeout(async () => {
-        const newPass = prompt("🛡️ Trainer, enter your new secure password (min 8 characters):");
-        
-        if (newPass) {
-          if (newPass.length < 8) { 
-              alert("❌ Too short! Must be at least 8 characters."); 
-              location.reload(); 
-              return; 
-          }
-          
-          const { error } = await sb.auth.updateUser({ password: newPass });
-          
-          if (error) {
-              alert("❌ Error: " + error.message);
-          } else { 
-              alert("✅ Password updated! You can now log in normally."); 
-              location.reload(); 
-          }
-        }
-      }, 500);
-    } 
-    // Handle normal logins
-    else if (session) {
+    if (session) {
       await loadProfile(session.user); 
-    } 
-    // Handle logouts
-    else { 
+    } else { 
       currentUser = null; 
       profile = null; 
       renderNav(); 
@@ -1184,8 +1158,9 @@ async function handleForgotPassword() {
 
   setBtnLoading('fp-btn', true);
 
+  // REDIRECTS DIRECTLY TO THE NEW RESET PAGE
   const { error } = await sb.auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://roria-tournaments.vercel.app/index.html', 
+    redirectTo: window.location.origin + '/reset-password.html', 
   });
 
   if (error) {
