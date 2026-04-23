@@ -758,7 +758,6 @@
   </div>
 </div>
 
-
 <div class="container" id="tournaments-sec-live" style="display:none;">
     <div class="sec-head">
         <p class="sec-eyebrow">// Right Now</p>
@@ -934,69 +933,68 @@ let currentUser = null;
 let profile = null;
 
 window.addEventListener('DOMContentLoaded', async () => {
+  // 1. Check for basic link errors first
   const hash = window.location.hash;
-
-  // 1. Check if there is an error in the URL (like the expired link in your screenshot)
-  if (hash && hash.includes('error_description')) {
-    const params = new URLSearchParams(hash.replace('#', '?'));
-    const errorMsg = params.get('error_description').replace(/\+/g, ' ');
-    alert("❌ Reset Link Error: " + errorMsg + ". Please request a new link.");
-    window.location.hash = ""; // Clear the error from the URL
+  const search = window.location.search;
+  
+  if ((hash && hash.includes('error_description')) || (search && search.includes('error_description'))) {
+    const params = new URLSearchParams((hash || search).replace('#', '?'));
+    const errorMsg = (params.get('error_description') || "Invalid Link").replace(/\+/g, ' ');
+    alert("❌ Link Error: " + errorMsg);
+    window.location.hash = "";
     return;
   }
 
-  // 2. Check if the user is arriving from a VALID recovery email
-  if (hash && hash.includes('type=recovery')) {
-    // Small delay to ensure the page is ready
-    setTimeout(async () => {
-      const newPassword = prompt("🛡️ Trainer, enter your new secure password (min 8 characters):");
-      
-      if (newPassword) {
-        if (newPassword.length < 8) {
-          alert("❌ Password is too short! Must be at least 8 characters.");
-          location.reload(); // Restart the process
-          return;
-        }
-
-        const { error } = await sb.auth.updateUser({ password: newPassword });
-        
-        if (error) {
-          alert("❌ Error: " + error.message);
-        } else {
-          alert("✅ Success! Your password has been updated. You can now log in.");
-          window.location.hash = ""; // Clean the URL
-          location.reload();
-        }
-      }
-    }, 500);
-  }
-
-  // ... rest of your existing DOMContentLoaded code (session checks, etc.)
-});
-
-window.addEventListener('DOMContentLoaded', async () => {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    await loadProfile(session.user);
-  } else {
-    updateHeroButtons();
-  }
-
+  // 2. Auth state listener (Includes the Password Recovery detection!)
   sb.auth.onAuthStateChange(async (event, session) => {
-    if (session) { 
-        await loadProfile(session.user); 
-    } else { 
-        currentUser = null; 
-        profile = null; 
-        renderNav(); 
-        updateHeroButtons();
+    // If Supabase detects a password reset link was clicked:
+    if (event === 'PASSWORD_RECOVERY') {
+      setTimeout(async () => {
+        const newPass = prompt("🛡️ Trainer, enter your new secure password (min 8 characters):");
+        
+        if (newPass) {
+          if (newPass.length < 8) { 
+              alert("❌ Too short! Must be at least 8 characters."); 
+              location.reload(); 
+              return; 
+          }
+          
+          const { error } = await sb.auth.updateUser({ password: newPass });
+          
+          if (error) {
+              alert("❌ Error: " + error.message);
+          } else { 
+              alert("✅ Password updated! You can now log in normally."); 
+              location.reload(); 
+          }
+        }
+      }, 500);
+    } 
+    // Handle normal logins
+    else if (session) {
+      await loadProfile(session.user); 
+    } 
+    // Handle logouts
+    else { 
+      currentUser = null; 
+      profile = null; 
+      renderNav(); 
+      updateHeroButtons(); 
     }
   });
+
+  // 3. Regular Session Check on initial load
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+      await loadProfile(session.user);
+  } else {
+      updateHeroButtons();
+  }
 
   loadTournaments(); 
   loadStats();
   loadLeaderboard(); 
-  fetchLatestNews(); // Fetch the dynamic news!
+  fetchLatestNews();
 });
 
 /* ─── DYNAMIC HERO BUTTONS ─── */
@@ -1186,8 +1184,8 @@ async function handleForgotPassword() {
 
   setBtnLoading('fp-btn', true);
 
-  const { data, error } = await sb.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + '/account.html',
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://roria-tournaments.vercel.app/index.html', 
   });
 
   if (error) {
@@ -1310,7 +1308,6 @@ async function loadLeaderboard() {
       : `<div class="lb-av">${(trainer.username || 'T')[0].toUpperCase()}</div>`;
 
     const isMe = currentUser && trainer.id === currentUser.id;
-    // Updated rowClick and rowStyle to disable clicking for self
     const rowClick = isMe ? '' : `onclick="window.location.href='user.html?id=${trainer.id}'"`;
     const rowStyle = isMe ? 'style="background: #fffaf5; cursor:default;"' : 'style="cursor:pointer;"';
 
@@ -1334,7 +1331,6 @@ async function loadStats() {
   const totalVal = document.getElementById('stat-total');
   const liveVal = document.getElementById('stat-live');
 
-  // Use standard select if count: exact is blocked by RLS
   const { data: pData } = await sb.from('profiles').select('id');
   if (playerVal) playerVal.textContent = pData ? pData.length : 0;
 
@@ -1410,25 +1406,6 @@ async function loadTournaments() {
   if (liveSection) liveSection.style.display = hasLive ? 'block' : 'none';
   if (upcomingSection) upcomingSection.style.display = hasUpcoming ? 'block' : 'none';
   if (pastSection) pastSection.style.display = hasPast ? 'block' : 'none';
-  async function handleForgotPassword() {
-  clearErrors('ff');
-  const email = v('fp-email');
-  if (!email) { setErr('ff-email'); return; }
-
-  setBtnLoading('fp-btn', true);
-
-  // Explicitly tell Supabase to send them back to your Vercel home page
-  const { data, error } = await sb.auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://roria-tournaments.vercel.app/index.html', 
-  });
-
-  if (error) {
-    showStatus('fp-status', 'err', error.message);
-  } else {
-    showStatus('fp-status', 'ok', 'Check your email for the reset link!');
-  }
-  setBtnLoading('fp-btn', false);
-}
 }
 </script>
 </body>
