@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Validation - RBG Roria</title>
+        <link rel="icon" type="image/svg+xml" href="Gemini_Generated_Image_9l05hr9l05hr9l05__1_-removebg-preview.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --red: #e3350d; --red-dk: #b02a0a; --off: #ece8df;
+            --border: #c8c0b0; --text: #2a2a2a; --muted: #7a7265;
+            --green: #4caf50;
+        }
+        body { font-family: 'Nunito', sans-serif; background: var(--off); color: var(--text); padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { background: #fff; border: 4px solid var(--border); border-radius: 18px; padding: 30px; width: 100%; max-width: 700px; box-shadow: 0 8px 0 rgba(0,0,0,0.12); }
+        h1 { font-family: 'Press Start 2P', monospace; font-size: 16px; margin-bottom: 20px; color: var(--red); }
+        .team-box { background: var(--off); border: 2px solid var(--border); padding: 15px; border-radius: 10px; font-family: monospace; font-size: 13px; white-space: pre-wrap; max-height: 400px; overflow-y: auto; margin-bottom: 20px; }
+        .btn-poke { padding: 12px 24px; border-radius: 10px; border: none; font-family: 'Nunito', sans-serif; font-weight: 800; cursor: pointer; text-transform: uppercase; color: #fff; box-shadow: 0 4px 0 rgba(0,0,0,0.2); transition: .1s; margin-right: 10px; }
+        .btn-poke:active { transform: translateY(2px); box-shadow: none; }
+        .btn-approve { background: var(--green); }
+        .btn-reject { background: var(--red); }
+        #status-msg { margin-top: 20px; font-weight: 800; font-size: 14px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Admin Team Validation</h1>
+    <div id="loading">Loading participant data...</div>
+    
+    <div id="content" style="display:none;">
+        <p><strong>Tournament ID:</strong> <span id="t-id"></span></p>
+        <p><strong>Player ID:</strong> <span id="p-id"></span></p>
+        <p><strong>Submitted Team:</strong></p>
+        
+        <div class="team-box" id="team-data-display"></div>
+        
+        <div style="display: flex; justify-content: center; margin-top: 20px;">
+            <button class="btn-poke btn-approve" id="btn-app" onclick="validateTeam(true)">Approve Team</button>
+            <button class="btn-poke btn-reject" id="btn-rej" onclick="validateTeam(false)">Reject Team</button>
+        </div>
+    </div>
+    
+    <div id="status-msg"></div>
+</div>
+
+<script>
+const SUPABASE_URL  = 'https://lvtmmtvxozabealfxqmy.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_tJbIaorQ_wp3Qt5_Vxwwgw_x7dcGc7-';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+const params = new URLSearchParams(window.location.search);
+const tId = params.get('t_id');
+const pId = params.get('p_id');
+
+let participantRecordId = null;
+
+window.addEventListener('DOMContentLoaded', async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    
+    if (!session) {
+        showError("You must be logged in as an admin to view this page.");
+        return;
+    }
+
+    // Verify Admin
+    const { data: prof } = await sb.from('profiles').select('is_admin').eq('id', session.user.id).single();
+    if (!prof || !prof.is_admin) {
+        showError("Access Denied: You are not an admin.");
+        return;
+    }
+
+    if (!tId || !pId) {
+        showError("Invalid link. Missing Tournament ID or Player ID.");
+        return;
+    }
+
+    document.getElementById('t-id').textContent = tId;
+    document.getElementById('p-id').textContent = pId;
+
+    // Fetch Team
+    const { data: participant, error } = await sb.from('tournament_participants')
+        .select('*')
+        .eq('tournament_id', tId)
+        .eq('profile_id', pId)
+        .single();
+
+    if (error || !participant) {
+        showError("Could not find this registration record.");
+        return;
+    }
+
+    participantRecordId = participant.id;
+    document.getElementById('team-data-display').textContent = participant.team_data || "No team data found.";
+    
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('content').style.display = 'block';
+
+    if (participant.validation_status === true) {
+        showStatus("⚠️ This team has already been APPROVED.", "var(--green)");
+    }
+});
+
+async function validateTeam(isApproved) {
+    document.getElementById('btn-app').disabled = true;
+    document.getElementById('btn-rej').disabled = true;
+    
+    const { error } = await sb.from('tournament_participants')
+        .update({ validation_status: isApproved })
+        .eq('id', participantRecordId);
+
+    if (error) {
+        showError("Failed to update: " + error.message);
+        document.getElementById('btn-app').disabled = false;
+        document.getElementById('btn-rej').disabled = false;
+    } else {
+        if (isApproved) {
+            showStatus("✅ Team successfully APPROVED.", "var(--green)");
+        } else {
+            showStatus("❌ Team REJECTED.", "var(--red)");
+        }
+    }
+}
+
+function showError(msg) {
+    document.getElementById('loading').style.display = 'none';
+    showStatus(msg, "var(--red)");
+}
+
+function showStatus(msg, color) {
+    const el = document.getElementById('status-msg');
+    el.textContent = msg;
+    el.style.color = color;
+}
+</script>
+</body>
+</html>

@@ -758,6 +758,7 @@
   </div>
 </div>
 
+
 <div class="container" id="tournaments-sec-live" style="display:none;">
     <div class="sec-head">
         <p class="sec-eyebrow">// Right Now</p>
@@ -933,42 +934,28 @@ let currentUser = null;
 let profile = null;
 
 window.addEventListener('DOMContentLoaded', async () => {
-  // 1. Check for basic link errors from old attempts
-  const hash = window.location.hash;
-  const search = window.location.search;
-  
-  if ((hash && hash.includes('error_description')) || (search && search.includes('error_description'))) {
-    const params = new URLSearchParams((hash || search).replace('#', '?'));
-    const errorMsg = (params.get('error_description') || "Invalid Link").replace(/\+/g, ' ');
-    alert("❌ Link Error: " + errorMsg);
-    window.location.hash = "";
-    return;
-  }
-
-  // 2. Auth state listener 
-  sb.auth.onAuthStateChange(async (event, session) => {
-    if (session) {
-      await loadProfile(session.user); 
-    } else { 
-      currentUser = null; 
-      profile = null; 
-      renderNav(); 
-      updateHeroButtons(); 
-    }
-  });
-
-  // 3. Regular Session Check on initial load
   const { data: { session } } = await sb.auth.getSession();
   if (session) {
-      await loadProfile(session.user);
+    await loadProfile(session.user);
   } else {
-      updateHeroButtons();
+    updateHeroButtons();
   }
+
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (session) { 
+        await loadProfile(session.user); 
+    } else { 
+        currentUser = null; 
+        profile = null; 
+        renderNav(); 
+        updateHeroButtons();
+    }
+  });
 
   loadTournaments(); 
   loadStats();
   loadLeaderboard(); 
-  fetchLatestNews();
+  fetchLatestNews(); // Fetch the dynamic news!
 });
 
 /* ─── DYNAMIC HERO BUTTONS ─── */
@@ -1158,15 +1145,15 @@ async function handleForgotPassword() {
 
   setBtnLoading('fp-btn', true);
 
-  // REDIRECTS DIRECTLY TO THE NEW RESET PAGE
-  const { error } = await sb.auth.resetPasswordForEmail(email, {
+  // REDIRECT UPDATED TO POINT TO RESET-PASSWORD.HTML
+  const { data, error } = await sb.auth.resetPasswordForEmail(email, {
     redirectTo: window.location.origin + '/reset-password.html', 
   });
 
   if (error) {
     showStatus('fp-status', 'err', error.message);
   } else {
-    showStatus('fp-status', 'ok', 'Password reset link sent! Check your email.');
+    showStatus('fp-status', 'ok', 'Check your email for the reset link!');
   }
   setBtnLoading('fp-btn', false);
 }
@@ -1283,6 +1270,7 @@ async function loadLeaderboard() {
       : `<div class="lb-av">${(trainer.username || 'T')[0].toUpperCase()}</div>`;
 
     const isMe = currentUser && trainer.id === currentUser.id;
+    // Updated rowClick and rowStyle to disable clicking for self
     const rowClick = isMe ? '' : `onclick="window.location.href='user.html?id=${trainer.id}'"`;
     const rowStyle = isMe ? 'style="background: #fffaf5; cursor:default;"' : 'style="cursor:pointer;"';
 
@@ -1306,6 +1294,7 @@ async function loadStats() {
   const totalVal = document.getElementById('stat-total');
   const liveVal = document.getElementById('stat-live');
 
+  // Use standard select if count: exact is blocked by RLS
   const { data: pData } = await sb.from('profiles').select('id');
   if (playerVal) playerVal.textContent = pData ? pData.length : 0;
 
