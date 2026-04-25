@@ -503,8 +503,8 @@
     box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
-    width: 260px; 
-    height: 260px; /* Forces a perfect square */
+    width: 100%; 
+    height: 260px; /* Forces a perfect square-like shape when scaled */
     margin: 0 auto;
     overflow: hidden;
     cursor: pointer;
@@ -807,12 +807,12 @@
     <h2 class="sec-title">News &amp; Announcements</h2>
   </div>
 
-  <div id="home-news-container">
-      <div style="text-align:center; padding: 40px; color:var(--muted); font-weight:700;">Loading latest news...</div>
+  <div id="home-news-container" class="card-grid">
+      <div style="grid-column: 1 / -1; text-align:center; padding: 40px; color:var(--muted); font-weight:700;">Loading latest news...</div>
   </div>
 
   <div style="text-align:center; margin-top:28px;">
-    <button class="btn-poke btn-outline" onclick="location.href='news.html'">📰 See News</button>
+    <button class="btn-poke btn-outline" onclick="location.href='news.html'">📰 See All News</button>
   </div>
 </div>
 
@@ -1225,22 +1225,37 @@ async function fetchLatestNews() {
     const container = document.getElementById('home-news-container');
     if(!container) return;
 
-    const { data: article, error } = await sb.from('news_articles').select('*').order('created_at', { ascending: false }).limit(1).single();
+    // Fetch the 5 most recent articles instead of just 1
+    const { data: articles, error } = await sb.from('news_articles')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(5);
 
-    if (error || !article) {
-        container.innerHTML = `<div style="text-align:center; color:var(--muted); font-weight:700; padding: 20px;">No recent news available.</div>`;
+    if (error || !articles || articles.length === 0) {
+        container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; color:var(--muted); font-weight:700; padding: 20px;">No recent news available.</div>`;
         return;
     }
 
-    container.innerHTML = `
-      <div class="np-featured" onclick="location.href='article.html?id=${article.id}'">
-        <div class="np-featured-icon">🌪️</div>
-        <div class="np-featured-body">
-          <h3 class="np-title">${article.title}</h3>
-          <span class="np-read-more">Read More →</span>
-        </div>
-      </div>
-    `;
+    container.innerHTML = articles.map(article => {
+        // Set dynamic colors and icons based on the category
+        let icon = '📰';
+        let bg = 'linear-gradient(135deg, var(--red), var(--red-dk))';
+        
+        if (article.category === 'Announcement') { icon = '📢'; }
+        else if (article.category === 'Tournament') { icon = '🏆'; bg = 'linear-gradient(135deg, #2c6fad, #1a4a7a)'; }
+        else if (article.category === 'Update') { icon = '⚙️'; bg = 'linear-gradient(135deg, #3a9a4a, #1e6630)'; }
+        else if (article.category === 'Community') { icon = '⭐'; bg = 'linear-gradient(135deg, #c89010, #a07000)'; }
+        
+        return `
+          <div class="np-featured" onclick="location.href='article.html?id=${article.id}'">
+            <div class="np-featured-icon" style="background: ${bg};">${icon}</div>
+            <div class="np-featured-body">
+              <h3 class="np-title">${article.title}</h3>
+              <span class="np-read-more">Read More →</span>
+            </div>
+          </div>
+        `;
+    }).join('');
 }
 
 /* ─── LEADERBOARD ─── */
